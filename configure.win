@@ -1,7 +1,99 @@
 #!/bin/sh
-# osmiumr does not yet have a Windows build recipe (rwinlib-style prebuilt
-# libosmium/protozero/boost/etc. archives would be needed, mirroring how
-# packages like sf/gdalcubes fetch static Windows dependencies). See
-# plan.md for the dependency list. Contributions welcome.
-echo "*** osmiumr: Windows builds are not yet supported (see configure.win / plan.md)." >&2
-exit 1
+# osmiumr Windows configure script, run by R CMD INSTALL under Rtools'
+# bash. See ../plan-windows.md for the reasoning.
+#
+# libosmium, protozero, and nlohmann-json are all header-only and
+# vendored under src/vendor/ (see src/vendor/README.md) -- there is
+# nothing to detect for them here, on Windows or anywhere else.
+#
+# What's left is bz2/zlib/expat (+ optional lz4), which are compiled
+# libraries, not headers, and can't be vendored the same way. Unlike
+# the POSIX `configure`, this does not search a list of candidate
+# directories: Rtools' MSYS2 toolchain has its own self-contained
+# sysroot, and packages needing these libraries on Windows conventionally
+# rely on Rtools already providing them there rather than passing
+# explicit -I/-L paths. zlib in particular is essentially guaranteed
+# (R itself depends on it); bz2/expat/lz4 are less certain depending on
+# the Rtools version and are checked explicitly below rather than
+# assumed silently, so a missing one fails with an actionable message
+# instead of a confusing link error deep into compilation.
+
+set -e
+
+CXX=$("${R_HOME}/bin/R" CMD config CXX17 2>/dev/null || true)
+if [ -z "$CXX" ]; then
+    CXX=$("${R_HOME}/bin/R" CMD config CXX 2>/dev/null || true)
+fi
+
+WORKDIR=$(mktemp -d)
+trap 'rm -rf "$WORKDIR"' EXIT
+
+fail() {
+    echo "*** configure.win: $1" >&2
+    exit 1
+}
+
+# check_link <name> <header> <lib flag> <install hint>
+#
+# Tries to compile and link a trivial program using <header> and
+# linking against <lib flag>, relying entirely on Rtools' own default
+# include/library search paths (no -I/-L passed). Echoes "yes" or "no".
+check_link() {
+    name="$1"
+    header="$2"
+    libflag="$3"
+
+    cat > "$WORKDIR/test_${name}.cpp" <<EOF
+#include <${header}>
+int main() { return 0; }
+EOF
+
+    if "$CXX" -std=c++17 "$WORKDIR/test_${name}.cpp" -o "$WORKDIR/test_${name}.exe" ${libflag} > "$WORKDIR/test_${name}.log" 2>&1; then
+        echo "yes"
+    else
+        echo "no"
+    fi
+}
+
+echo "--- osmiumr configure.win ---"
+
+BZ2_OK=$(check_link bz2 "bzlib.h" "-lbz2")
+if [ "$BZ2_OK" != "yes" ]; then
+    fail "bz2 not found via the Rtools toolchain's default search paths. osmiumr does not vendor bz2 (it needs a compiled library, not just headers -- see plan-windows.md). Install it into your Rtools toolchain first, e.g. from an Rtools shell: pacman -S mingw-w64-\$(uname -m)-bzip2"
+fi
+echo "bz2: found"
+
+ZLIB_OK=$(check_link zlib "zlib.h" "-lz")
+if [ "$ZLIB_OK" != "yes" ]; then
+    fail "zlib not found via the Rtools toolchain's default search paths (unexpected -- R itself depends on zlib, so this usually means something is wrong with the Rtools install rather than a genuinely missing library)."
+fi
+echo "zlib: found"
+
+EXPAT_OK=$(check_link expat "expat.h" "-lexpat")
+if [ "$EXPAT_OK" != "yes" ]; then
+    fail "expat not found via the Rtools toolchain's default search paths. osmiumr does not vendor expat (it needs a compiled library, not just headers -- see plan-windows.md). Install it into your Rtools toolchain first, e.g. from an Rtools shell: pacman -S mingw-w64-\$(uname -m)-expat"
+fi
+echo "expat: found"
+
+LZ4_OK=$(check_link lz4 "lz4.h" "-llz4")
+LZ4_DEFS=""
+LZ4_LIBS=""
+if [ "$LZ4_OK" = "yes" ]; then
+    echo "lz4: found - building with LZ4 PBF compression support"
+    LZ4_DEFS="-DOSMIUM_WITH_LZ4"
+    LZ4_LIBS="-llz4"
+else
+    echo "lz4: not found - building without LZ4 PBF compression support (optional; install mingw-w64-\$(uname -m)-lz4 via Rtools' pacman to enable)"
+fi
+
+PKG_CPPFLAGS="$LZ4_DEFS"
+PKG_LIBS="-lbz2 -lz -lexpat $LZ4_LIBS"
+
+echo "PKG_CPPFLAGS=$PKG_CPPFLAGS"
+echo "PKG_LIBS=$PKG_LIBS"
+
+sed -e "s|@osmiumr_cppflags@|$PKG_CPPFLAGS|" \
+    -e "s|@osmiumr_libs@|$PKG_LIBS|" \
+    src/Makevars.win.in > src/Makevars.win
+
+echo "--- osmiumr configure.win: done ---"

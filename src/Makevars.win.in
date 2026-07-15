@@ -1,6 +1,6 @@
 \
-# Generated into src/Makevars by ../configure. See ../configure for how
-# the substituted CPPFLAGS/LIBS values below are determined.
+# Generated into src/Makevars.win by ../configure.win. See ../configure.win
+# for how the substituted CPPFLAGS/LIBS values below are determined.
 #
 # -Icompat comes first so vendored osmium-tool files' own
 # `#include <boost/program_options.hpp>` resolves to osmiumr's
@@ -9,20 +9,20 @@
 # file for why a real boost::program_options is not used.
 #
 # The three -Ivendor/... entries are libosmium/nlohmann-json/protozero,
-# vendored verbatim under src/vendor/ (see src/vendor/README.md) rather
-# than detected on the system -- unlike @osmiumr_cppflags@ below, these
-# paths are the same on every platform, which is what makes Windows
-# builds possible at all for these three (see ../plan-windows.md).
+# vendored verbatim under src/vendor/ (see src/vendor/README.md). Unlike
+# @osmiumr_cppflags@/@osmiumr_libs@ below (bz2/zlib/expat/lz4, which
+# still need to come from Rtools' own toolchain -- see
+# ../plan-windows.md), these three need no detection at all: same paths
+# on every platform.
 
 PKG_CPPFLAGS = -Icompat -Ivendor/libosmium/include -Ivendor/nlohmann/include -Ivendor/protozero/include @osmiumr_cppflags@ -I.
 PKG_LIBS = @osmiumr_libs@
 
 CXX_STD = CXX17
 
-# Explicit source list rather than $(wildcard ...): CRAN's portability
-# checks flag GNU Make extensions like $(wildcard ...) in package
-# Makevars, so this is kept in sync by hand with src/osmium-tool/ (see
-# ../plan.md for which osmium-tool files are vendored and why).
+# Kept in sync by hand with src/osmium-tool/ -- see src/Makevars.in,
+# which this mirrors (the vendored source list is identical on every
+# platform; only how the *dependency* flags above are obtained differs).
 OSMIUM_TOOL_SOURCES = \
     osmium-tool/cmd.cpp \
     osmium-tool/cmd_factory.cpp \

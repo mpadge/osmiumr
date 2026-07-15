@@ -2,11 +2,20 @@
 # osmiumr configure script.
 #
 # Locates the system libraries osmium-tool's own CMakeLists.txt requires
-# (see osmium-tool/README.md / osmium-tool/CMakeLists.txt for the upstream
-# equivalent of these checks) and writes src/Makevars from
-# src/Makevars.in. There is no bundled copy of libosmium/protozero/etc. in
-# this package; they must be installed on the system, same as for building
-# osmium-tool itself. The one dependency osmium-tool itself needs but this
+# that osmiumr does NOT vendor, and writes src/Makevars from
+# src/Makevars.in.
+#
+# libosmium, protozero, and nlohmann-json are all header-only and are
+# vendored under src/vendor/ (see src/vendor/README.md), so there is
+# nothing to detect for them on any platform -- that's also what makes
+# building on Windows possible at all: there's no standard system
+# location for these on Windows the way there is on Linux/macOS, so
+# vendoring removes the whole class of problem rather than trying to
+# solve it (see ../plan-windows.md).
+#
+# What's left needing detection is bz2/zlib/expat (+ optional lz4),
+# which are compiled libraries, not headers, so can't be vendored the
+# same way. The one dependency osmium-tool itself needs but this
 # package does not is boost::program_options: osmiumr ships its own
 # header-only stand-in (src/compat/boost/program_options.hpp) for the
 # small subset of that API the vendored command_*.cpp setup() methods use,
@@ -64,33 +73,6 @@ find_lib() {
 
 echo "--- osmiumr configure ---"
 
-# --- libosmium (header-only) -------------------------------------------
-OSMIUM_INC=$(find_header "osmium/version.hpp" "${OSMIUM_INCLUDE_DIR}") \
-    || fail "libosmium headers not found. Install libosmium (>= 2.23.1), e.g. 'apt install libosmium2-dev', or set OSMIUM_INCLUDE_DIR."
-OSMIUM_MAJOR=$(sed -n 's/^#define LIBOSMIUM_VERSION_MAJOR \([0-9]*\).*/\1/p' "$OSMIUM_INC/osmium/version.hpp")
-OSMIUM_MINOR=$(sed -n 's/^#define LIBOSMIUM_VERSION_MINOR \([0-9]*\).*/\1/p' "$OSMIUM_INC/osmium/version.hpp")
-OSMIUM_PATCH=$(sed -n 's/^#define LIBOSMIUM_VERSION_PATCH \([0-9]*\).*/\1/p' "$OSMIUM_INC/osmium/version.hpp")
-echo "Found libosmium ${OSMIUM_MAJOR}.${OSMIUM_MINOR}.${OSMIUM_PATCH} in $OSMIUM_INC"
-if [ "$OSMIUM_MAJOR" -lt 2 ] || { [ "$OSMIUM_MAJOR" -eq 2 ] && [ "$OSMIUM_MINOR" -lt 23 ]; }; then
-    fail "libosmium >= 2.23.1 required, found ${OSMIUM_MAJOR}.${OSMIUM_MINOR}.${OSMIUM_PATCH}"
-fi
-
-# --- protozero (header-only) --------------------------------------------
-PROTOZERO_INC=$(find_header "protozero/version.hpp" "${PROTOZERO_INCLUDE_DIR}") \
-    || fail "protozero headers not found. Install protozero (>= 1.6.3), e.g. 'apt install libprotozero-dev', or set PROTOZERO_INCLUDE_DIR."
-PROTOZERO_MAJOR=$(sed -n 's/^#define PROTOZERO_VERSION_MAJOR \([0-9]*\).*/\1/p' "$PROTOZERO_INC/protozero/version.hpp")
-PROTOZERO_MINOR=$(sed -n 's/^#define PROTOZERO_VERSION_MINOR \([0-9]*\).*/\1/p' "$PROTOZERO_INC/protozero/version.hpp")
-PROTOZERO_PATCH=$(sed -n 's/^#define PROTOZERO_VERSION_PATCH \([0-9]*\).*/\1/p' "$PROTOZERO_INC/protozero/version.hpp")
-echo "Found protozero ${PROTOZERO_MAJOR}.${PROTOZERO_MINOR}.${PROTOZERO_PATCH} in $PROTOZERO_INC"
-if [ "$PROTOZERO_MAJOR" -lt 1 ] || { [ "$PROTOZERO_MAJOR" -eq 1 ] && [ "$PROTOZERO_MINOR" -lt 6 ]; }; then
-    fail "protozero >= 1.6.3 required, found ${PROTOZERO_MAJOR}.${PROTOZERO_MINOR}.${PROTOZERO_PATCH}"
-fi
-
-# --- nlohmann-json (header-only) ----------------------------------------
-JSON_INC=$(find_header "nlohmann/json.hpp" "${NLOHMANN_INCLUDE_DIR}") \
-    || fail "nlohmann-json headers not found. Install nlohmann-json (>= 3.0), e.g. 'apt install nlohmann-json3-dev', or set NLOHMANN_INCLUDE_DIR."
-echo "Found nlohmann-json in $JSON_INC"
-
 # --- bz2, zlib, expat ------------------------------------------------------
 BZ2_INC=$(find_header "bzlib.h") || fail "bzlib.h not found. Install libbz2-dev."
 BZ2_LIB_DIR=$(find_lib "bz2") || fail "libbz2 not found. Install libbz2-dev."
@@ -116,7 +98,7 @@ else
     LZ4_CPPFLAGS=""
 fi
 
-PKG_CPPFLAGS="-I$OSMIUM_INC -I$PROTOZERO_INC -I$JSON_INC -I$BZ2_INC -I$ZLIB_INC -I$EXPAT_INC $LZ4_CPPFLAGS $LZ4_DEFS"
+PKG_CPPFLAGS="-I$BZ2_INC -I$ZLIB_INC -I$EXPAT_INC $LZ4_CPPFLAGS $LZ4_DEFS"
 PKG_LIBS="-L$BZ2_LIB_DIR -lbz2 -L$ZLIB_LIB_DIR -lz -L$EXPAT_LIB_DIR -lexpat $LZ4_LIBS -lpthread"
 
 echo "PKG_CPPFLAGS=$PKG_CPPFLAGS"

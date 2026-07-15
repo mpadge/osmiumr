@@ -29,3 +29,4 @@ docs/
 literature/
 ^src/.*\.o$
 ^src/.*\.so$
+^src/Makevars\.win$
