@@ -34,7 +34,7 @@ jobs:
 
       - name: Install libbz2-dev (macOS)
         if: runner.os == 'macOS'
-        run: brew install bzip2
+        run: brew install bzip2-dev
 
       - uses: r-lib/actions/setup-pandoc@v2
 
