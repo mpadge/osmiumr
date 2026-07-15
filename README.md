@@ -32,6 +32,12 @@ You can install the development version of osmiumr from
 remotes::install_github("mpadge/osmiumr")
 ```
 
+Then load for use:
+
+``` r
+library(osmiumr)
+```
+
 ## Example
 
 Grab a small real-world extract to work with – the “ITS Leeds” test file
@@ -40,26 +46,19 @@ also used by [`osmextract`](https://docs.ropensci.org/osmextract/):
 ``` r
 its_example <- osmextract::oe_match("ITS Leeds", quiet = TRUE)
 
-osmextract::oe_download(
+f <- osmextract::oe_download(
   file_url = its_example$url,
   file_size = its_example$file_size,
   provider = "test",
   download_directory = tempdir(),
   quiet = TRUE
 )
-#> [1] "/tmp/RtmpwlwNG1/test_its-example.osm.pbf"
-
-f <- fs::dir_ls(tempdir(), regexp = "\\.osm\\.pbf$")
-f
-#> /tmp/RtmpwlwNG1/test_its-example.osm.pbf
 ```
 
 `osmium_fileinfo()` reports header and content summary information,
 mirroring `osmium fileinfo --extended`:
 
 ``` r
-library(osmiumr)
-
 info <- osmium_fileinfo(f, extended = TRUE)
 info$data$count
 #> $changesets
