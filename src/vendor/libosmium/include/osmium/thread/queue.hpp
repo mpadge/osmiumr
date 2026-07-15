@@ -127,20 +127,13 @@ namespace osmium {
             Queue(Queue&&) = delete;
             Queue& operator=(Queue&&) = delete;
 
-#ifdef OSMIUM_DEBUG_QUEUE_SIZE
-            ~Queue() {
-                std::cerr << "queue '" << m_name
-                          << "' with max_size=" << m_max_size
-                          << " had largest size " << m_largest_size
-                          << " and was full " << m_full_counter
-                          << " times in " << m_push_counter
-                          << " push() calls and was empty " << m_empty_counter
-                          << " times in " << m_pop_counter
-                          << " pop() calls\n";
-            }
-#else
+            // osmiumr note: upstream also has a debug destructor here,
+            // gated behind #ifdef OSMIUM_DEBUG_QUEUE_SIZE (never defined
+            // anywhere in this package), that prints queue high-water-mark
+            // stats via std::cerr. Removed rather than kept dead behind
+            // its #ifdef, since osmiumr has no way to define that macro
+            // through any exposed R parameter -- see plan-cout.md.
             ~Queue() = default;
-#endif
 
             /**
              * Push an element onto the queue. If the queue has a max size,

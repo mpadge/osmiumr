@@ -85,9 +85,6 @@ namespace osmium {
 
                 const std::size_t num_ways = ways.size();
                 for (const auto& t_c : counter) {
-                    if (debug()) {
-                        std::cerr << "        tag " << t_c.first << " is used " << t_c.second << " times in " << num_ways << " ways\n";
-                    }
                     if (t_c.second == num_ways) {
                         const std::size_t len = std::strlen(t_c.first.c_str());
                         tl_builder.add_tag(t_c.first.c_str(), t_c.first.c_str() + len + 1);
@@ -116,15 +113,7 @@ namespace osmium {
             void add_tags_to_area(osmium::builder::AreaBuilder& builder, const osmium::Relation& relation) {
                 const auto count = std::count_if(relation.tags().cbegin(), relation.tags().cend(), std::cref(filter()));
 
-                if (debug()) {
-                    std::cerr << "  found " << count << " tags on relation (without ignored ones)\n";
-                }
-
                 if (count > 0) {
-                    if (debug()) {
-                        std::cerr << "    use tags from relation\n";
-                    }
-
                     if (config().keep_type_tag) {
                         builder.add_item(relation.tags());
                     } else {
@@ -132,9 +121,6 @@ namespace osmium {
                     }
                 } else {
                     ++stats().no_tags_on_relation;
-                    if (debug()) {
-                        std::cerr << "    use tags from outer ways\n";
-                    }
                     std::set<const osmium::Way*> ways;
                     for (const auto& ring : rings()) {
                         if (ring.is_outer()) {
@@ -142,14 +128,8 @@ namespace osmium {
                         }
                     }
                     if (ways.size() == 1) {
-                        if (debug()) {
-                            std::cerr << "      only one outer way\n";
-                        }
                         builder.add_item((*ways.cbegin())->tags());
                     } else {
-                        if (debug()) {
-                            std::cerr << "      multiple outer ways, get common tags\n";
-                        }
                         osmium::builder::TagListBuilder tl_builder{builder};
                         add_common_tags(tl_builder, ways);
                     }
@@ -245,9 +225,6 @@ namespace osmium {
                     return false;
                 }
 
-                if (config().debug_level > 0) {
-                    std::cerr << "\nAssembling way " << way.id() << " containing " << segment_list().size() << " nodes\n";
-                }
 
                 // Now create the Area object and add the attributes and tags
                 // from the way.
@@ -258,9 +235,6 @@ namespace osmium {
                     out_buffer.rollback();
                 }
 
-                if (debug()) {
-                    std::cerr << "Done: " << stats() << "\n";
-                }
 
                 return okay;
             }
@@ -299,9 +273,6 @@ namespace osmium {
                     ++stats().single_way_in_mp_relation;
                 }
 
-                if (config().debug_level > 0) {
-                    std::cerr << "\nAssembling relation " << relation.id() << " containing " << members.size() << " way members with " << segment_list().size() << " nodes\n";
-                }
 
                 const std::size_t area_offset = out_buffer.committed();
 
@@ -354,9 +325,6 @@ namespace osmium {
                     });
                 }
 
-                if (debug()) {
-                    std::cerr << "Done: " << stats() << "\n";
-                }
 
                 // Now build areas for all ways found in the last step.
                 for (const osmium::Way* way : ways_that_should_be_areas) {

@@ -451,24 +451,16 @@ namespace osmium {
                 const uint64_t relations_buffer_capacity = m_relations_buffer.capacity();
                 const uint64_t members_buffer_capacity = m_members_buffer.capacity();
 
-                std::cerr << "  nR  = m_relations.capacity() ........... = " << std::setw(12) << m_relations.capacity() << "\n";
-                std::cerr << "  nMN = m_member_meta[NODE].capacity() ... = " << std::setw(12) << m_member_meta[0].capacity() << "\n";
-                std::cerr << "  nMW = m_member_meta[WAY].capacity() .... = " << std::setw(12) << m_member_meta[1].capacity() << "\n";
-                std::cerr << "  nMR = m_member_meta[RELATION].capacity() = " << std::setw(12) << m_member_meta[2].capacity() << "\n";
-                std::cerr << "  nM  = m_member_meta[*].capacity() ...... = " << std::setw(12) << nmembers << "\n";
-
-                std::cerr << "  sRM = sizeof(RelationMeta) ............. = " << std::setw(12) << sizeof(RelationMeta) << "\n";
-                std::cerr << "  sMM = sizeof(MemberMeta) ............... = " << std::setw(12) << sizeof(MemberMeta) << "\n\n";
-
-                std::cerr << "  nR * sRM ............................... = " << std::setw(12) << relations_size << "\n";
-                std::cerr << "  nM * sMM ............................... = " << std::setw(12) << members << "\n";
-                std::cerr << "  relations_buffer_capacity .............. = " << std::setw(12) << relations_buffer_capacity << "\n";
-                std::cerr << "  members_buffer_capacity ................ = " << std::setw(12) << members_buffer_capacity << "\n";
-
-                const uint64_t total = relations_size + members + relations_buffer_capacity + members_buffer_capacity;
-
-                std::cerr << "  total .................................. = " << std::setw(12) << total << "\n";
-                std::cerr << "  =======================================================\n";
+                // osmiumr note: upstream also prints these capacity/size
+                // figures to std::cerr unconditionally (not behind any
+                // debug flag) every time this is called. Removed --
+                // nothing in osmium-tool ever calls this particular
+                // Collector::used_memory() (only unrelated same-named
+                // methods on other classes, e.g. IdSetDense), so it was
+                // already dead code from osmiumr's perspective; the
+                // return-value computation below is kept exactly as
+                // upstream in case anything internal to libosmium itself
+                // depends on it. See plan-cout.md.
 
                 return relations_buffer_capacity + members_buffer_capacity + relations_size + members;
             }
@@ -576,15 +568,7 @@ namespace osmium {
             void possibly_purge_removed_members() {
                 ++m_count_complete;
                 if (m_count_complete > 10000) { // XXX
-//                    const size_t size_before = m_members_buffer.committed();
                     m_members_buffer.purge_removed(this);
-/*
-                    const size_t size_after = m_members_buffer.committed();
-                    double percent = static_cast<double>(size_before - size_after);
-                    percent /= size_before;
-                    percent *= 100;
-                    std::cerr << "PURGE (size before=" << size_before << " after=" << size_after << " purged=" << (size_before - size_after) << " / " << static_cast<int>(percent) << "%)\n";
-*/
                     m_count_complete = 0;
                 }
             }

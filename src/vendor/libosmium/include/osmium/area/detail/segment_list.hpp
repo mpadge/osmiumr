@@ -87,6 +87,13 @@ namespace osmium {
 
                 slist_type m_segments;
 
+                // osmiumr note: still set (see constructor /
+                // enable_debug_output() below) but no longer read anywhere
+                // -- the two `if
+                // (m_debug) { std::cerr << ...; }` debug-trace blocks that
+                // used to check it were removed, since osmiumr has no way
+                // to reach debug_level > 1 (what ultimately drives this)
+                // through any exposed R parameter. See plan-cout.md.
                 bool m_debug;
 
                 static role_type parse_role(const char* role) noexcept {
@@ -279,9 +286,6 @@ namespace osmium {
                         if (it == m_segments.end()) {
                             break;
                         }
-                        if (m_debug) {
-                            std::cerr << "  erase duplicate segment: " << *it << "\n";
-                        }
 
                         // Only count and report duplicate segments if they
                         // belong to the same way or if they don't both have
@@ -337,9 +341,6 @@ namespace osmium {
                                 const osmium::Location intersection{calculate_intersection(s1, s2)};
                                 if (intersection) {
                                     ++found_intersections;
-                                    if (m_debug) {
-                                        std::cerr << "  segments " << s1 << " and " << s2 << " intersecting at " << intersection << "\n";
-                                    }
                                     if (problem_reporter) {
                                         problem_reporter->report_intersection(s1.way()->id(), s1.first().location(), s1.second().location(),
                                                                               s2.way()->id(), s2.first().location(), s2.second().location(), intersection);

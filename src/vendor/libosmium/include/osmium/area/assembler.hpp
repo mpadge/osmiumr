@@ -149,10 +149,6 @@ namespace osmium {
                     return false;
                 }
 
-                if (config().debug_level > 0) {
-                    std::cerr << "\nAssembling way " << way.id() << " containing " << segment_list().size() << " nodes\n";
-                }
-
                 // Now create the Area object and add the attributes and tags
                 // from the way.
                 const bool okay = create_area(out_buffer, way);
@@ -162,9 +158,6 @@ namespace osmium {
                     out_buffer.rollback();
                 }
 
-                if (debug()) {
-                    std::cerr << "Done: " << stats() << "\n";
-                }
 
                 return okay;
             }
@@ -207,9 +200,6 @@ namespace osmium {
                     ++stats().single_way_in_mp_relation;
                 }
 
-                if (config().debug_level > 0) {
-                    std::cerr << "\nAssembling relation " << relation.id() << " containing " << members.size() << " way members with " << segment_list().size() << " nodes\n";
-                }
 
                 // Now create the Area object and add the attributes and tags
                 // from the relation.

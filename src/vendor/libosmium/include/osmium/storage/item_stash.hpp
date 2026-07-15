@@ -303,24 +303,14 @@ namespace osmium {
          *
          * Complexity: Linear in size() + count_removed().
          */
+        // osmiumr note: upstream also has GC timing/stats output here,
+        // gated behind #ifdef OSMIUM_ITEM_STORAGE_GC_DEBUG (never defined
+        // anywhere in this package) and printed via std::cerr. Removed --
+        // see plan-cout.md.
         void garbage_collect() {
-#ifdef OSMIUM_ITEM_STORAGE_GC_DEBUG
-            std::cerr << "GC items=" << m_count_items << " removed=" << m_count_removed << " buffer.committed=" << m_buffer.committed() << " buffer.capacity=" << m_buffer.capacity() << "\n";
-            using clock = std::chrono::high_resolution_clock;
-            std::chrono::time_point<clock> start = clock::now();
-#endif
-
             m_count_removed = 0;
             cleanup_helper helper{m_index};
             m_buffer.purge_removed(&helper);
-
-#ifdef OSMIUM_ITEM_STORAGE_GC_DEBUG
-            std::chrono::time_point<clock> stop = clock::now();
-            const int64_t time = std::chrono::duration_cast<std::chrono::microseconds>(stop - start).count();
-            m_gc_time += time;
-            std::cerr << "        time=" << time
-                      << "us total=" << m_gc_time << "us\n";
-#endif
         }
 
         /**
