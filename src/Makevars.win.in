@@ -16,14 +16,20 @@
 # on every platform.
 
 PKG_CPPFLAGS = -Icompat -Ivendor/libosmium/include -Ivendor/nlohmann/include -Ivendor/protozero/include @osmiumr_cppflags@ -I.
-PKG_LIBS = @osmiumr_libs@ -Wl,--strip-debug
+PKG_LIBS = @osmiumr_libs@
 
 CXX_STD = CXX17
 
-# See src/Makevars.in for why just -Wl,--strip-debug (not a full strip,
-# not -ffunction-sections/-fdata-sections + -Wl,--gc-sections, which
-# measured no benefit here and trips an R CMD check portability
-# WARNING) -- ../plan-reduce-size.md.
+# The debug-info-stripping linker flag is *not* hardcoded here -- it's
+# probed for by ../configure.win and comes in via @osmiumr_libs@ above,
+# same as src/Makevars.in. See that file and ../configure for why: this
+# previously shipped hardcoded as -Wl,--strip-debug right in this file,
+# which happens to work with Rtools' MinGW/GNU ld but is exactly the
+# hardcoded assumption that broke every macOS install of the
+# (also-hardcoded) src/Makevars.in copy of this flag -- ../plan-reduce-size.md.
+# Not a full strip, not -ffunction-sections/-fdata-sections +
+# -Wl,--gc-sections, which measured no benefit here and trips an R CMD
+# check portability WARNING -- see src/Makevars.in for the full rationale.
 
 # Kept in sync by hand with src/osmium-tool/ -- see src/Makevars.in,
 # which this mirrors (the vendored source list is identical on every

@@ -15,13 +15,21 @@
 # builds possible at all for these three (see ../plan-windows.md).
 
 PKG_CPPFLAGS = -Icompat -Ivendor/libosmium/include -Ivendor/nlohmann/include -Ivendor/protozero/include @osmiumr_cppflags@ -I.
-PKG_LIBS = @osmiumr_libs@ -Wl,--strip-debug
+PKG_LIBS = @osmiumr_libs@
 
 CXX_STD = CXX17
 
-# Size reduction -- see ../plan-reduce-size.md. -Wl,--strip-debug
-# removes debugging metadata from the final .so: measured 19MB
-# unstripped here, 8.1MB with just this flag.
+# Size reduction -- see ../plan-reduce-size.md. @osmiumr_libs@ above
+# includes a linker flag ../configure probes for (trying
+# -Wl,--strip-debug, then -Wl,-S, then giving up) to strip debugging
+# metadata from the final .so at link time: measured 19MB unstripped,
+# 8.1MB with it. Not hardcoded here: -Wl,--strip-debug is GNU ld/gold/
+# lld syntax that Apple's ld64 (macOS) doesn't understand and hard-fails
+# the *entire* link on -- this previously shipped hardcoded as
+# -Wl,--strip-debug right in this file and broke every macOS install
+# ("ld: unknown options: --strip-debug"). Probing for a working flag at
+# configure time instead of hardcoding one (Linux-only assumption) or
+# the other (untested elsewhere) is what ../configure now does.
 #
 # Tried and dropped: -ffunction-sections/-fdata-sections (compile time)
 # + -Wl,--gc-sections (link time), meant to let the linker discard

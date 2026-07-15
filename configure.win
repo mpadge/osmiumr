@@ -48,7 +48,8 @@ check_link() {
 int main() { return 0; }
 EOF
 
-    if "$CXX" -std=c++17 "$WORKDIR/test_${name}.cpp" -o "$WORKDIR/test_${name}.exe" ${libflag} > "$WORKDIR/test_${name}.log" 2>&1; then
+    # $CXX deliberately unquoted -- see the strip-flag probe below for why.
+    if $CXX -std=c++17 "$WORKDIR/test_${name}.cpp" -o "$WORKDIR/test_${name}.exe" ${libflag} > "$WORKDIR/test_${name}.log" 2>&1; then
         echo "yes"
     else
         echo "no"
@@ -86,8 +87,34 @@ else
     echo "lz4: not found - building without LZ4 PBF compression support (optional; install mingw-w64-\$(uname -m)-lz4 via Rtools' pacman to enable)"
 fi
 
+# --- link-time debug-info stripping flag (best-effort) ---------------------
+# Size reduction, see ../plan-reduce-size.md -- probed rather than
+# hardcoded for the same reason the POSIX ../configure probes it: Apple's
+# ld64 (macOS) rejects GNU ld's -Wl,--strip-debug spelling outright and
+# fails the whole link, which is exactly what happened when this was
+# hardcoded. Rtools' MinGW toolchain is GNU ld, so --strip-debug is
+# expected to work here, but probe rather than assume regardless.
+STRIP_LDFLAGS=""
+echo 'int main() { return 0; }' > "$WORKDIR/striptest.cpp"
+for flag in -Wl,--strip-debug -Wl,-S; do
+    # $CXX deliberately unquoted: R CMD config CXX17 can return a
+    # multi-word command, and quoting it here makes the shell look for a
+    # single binary with a literal space in its name, silently failing
+    # every flag in this loop (caught the hard way on the POSIX
+    # ../configure counterpart of this probe, where CXX was "ccache
+    # clang++").
+    if $CXX -std=c++17 -o "$WORKDIR/striptest.exe" $flag "$WORKDIR/striptest.cpp" > /dev/null 2>&1; then
+        STRIP_LDFLAGS="$flag"
+        echo "Using $flag to strip debug info from the built shared library"
+        break
+    fi
+done
+if [ -z "$STRIP_LDFLAGS" ]; then
+    echo "Note: no working linker flag found to strip debug info (tried --strip-debug, -S) - osmiumr.dll will be larger than necessary, see plan-reduce-size.md"
+fi
+
 PKG_CPPFLAGS="$LZ4_DEFS"
-PKG_LIBS="-lbz2 -lz -lexpat $LZ4_LIBS"
+PKG_LIBS="-lbz2 -lz -lexpat $LZ4_LIBS $STRIP_LDFLAGS"
 
 echo "PKG_CPPFLAGS=$PKG_CPPFLAGS"
 echo "PKG_LIBS=$PKG_LIBS"

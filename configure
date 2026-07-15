@@ -125,8 +125,37 @@ else
     LZ4_CPPFLAGS=""
 fi
 
+# --- link-time debug-info stripping flag (best-effort) ---------------------
+# Size reduction (see ../plan-reduce-size.md): strip debug info from the
+# final shared library at link time. GNU ld/gold/lld understand
+# --strip-debug; Apple's ld64 (macOS) does not and hard-fails the *entire*
+# link if given it -- this previously shipped hardcoded as
+# -Wl,--strip-debug directly in Makevars.in and broke every macOS install
+# (00install.out: "ld: unknown options: --strip-debug"). -S is accepted
+# by both GNU ld and ld64, but rather than swap one hardcoded assumption
+# for another and risk the same surprise on some other linker later,
+# probe for a working flag empirically instead of assuming either way.
+STRIP_LDFLAGS=""
+STRIPTEST_DIR=$(mktemp -d 2>/dev/null || echo /tmp)
+echo 'int main() { return 0; }' > "$STRIPTEST_DIR/striptest.cpp"
+for flag in -Wl,--strip-debug -Wl,-S; do
+    # $CXX deliberately unquoted: R CMD config CXX17 can return a
+    # multi-word command (e.g. "ccache clang++"), and quoting it here
+    # makes the shell look for a single binary literally named
+    # "ccache clang++", silently failing every flag in this loop.
+    if $CXX -o "$STRIPTEST_DIR/striptest" $flag "$STRIPTEST_DIR/striptest.cpp" > /dev/null 2>&1; then
+        STRIP_LDFLAGS="$flag"
+        echo "Using $flag to strip debug info from the built shared library"
+        break
+    fi
+done
+if [ -z "$STRIP_LDFLAGS" ]; then
+    echo "Note: no working linker flag found to strip debug info (tried --strip-debug, -S) - osmiumr.so will be larger than necessary, see plan-reduce-size.md"
+fi
+rm -rf "$STRIPTEST_DIR"
+
 PKG_CPPFLAGS="-I$BZ2_INC -I$ZLIB_INC -I$EXPAT_INC $LZ4_CPPFLAGS $LZ4_DEFS"
-PKG_LIBS="-L$BZ2_LIB_DIR -lbz2 -L$ZLIB_LIB_DIR -lz -L$EXPAT_LIB_DIR -lexpat $LZ4_LIBS -lpthread"
+PKG_LIBS="-L$BZ2_LIB_DIR -lbz2 -L$ZLIB_LIB_DIR -lz -L$EXPAT_LIB_DIR -lexpat $LZ4_LIBS -lpthread $STRIP_LDFLAGS"
 
 echo "PKG_CPPFLAGS=$PKG_CPPFLAGS"
 echo "PKG_LIBS=$PKG_LIBS"
