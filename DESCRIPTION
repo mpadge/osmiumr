@@ -14,7 +14,6 @@ Description: Provides R functions wrapping the command implementations of
     into this package and called in-process through a small 'Rcpp' bridge.
 License: GPL (>= 3)
 Encoding: UTF-8
-LazyData: true
 SystemRequirements: C++17, libosmium (>= 2.23.1), protozero (>= 1.6.3),
     nlohmann-json (>= 3.0), bz2lib, zlib, expat. Optionally lz4 for LZ4
     PBF compression support. Unlike osmium-tool itself, no boost
