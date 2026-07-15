@@ -14,25 +14,42 @@
 # paths are the same on every platform, which is what makes Windows
 # builds possible at all for these three (see ../plan-windows.md).
 
-PKG_CPPFLAGS = -Icompat -Ivendor/libosmium/include -Ivendor/nlohmann/include -Ivendor/protozero/include @osmiumr_cppflags@ -I. -ffunction-sections -fdata-sections
-PKG_LIBS = @osmiumr_libs@ -Wl,--gc-sections -Wl,-s
+PKG_CPPFLAGS = -Icompat -Ivendor/libosmium/include -Ivendor/nlohmann/include -Ivendor/protozero/include @osmiumr_cppflags@ -I.
+PKG_LIBS = @osmiumr_libs@ -Wl,--strip-debug
 
 CXX_STD = CXX17
 
-# -ffunction-sections/-fdata-sections (above, compile time) put each
-# function/variable in its own linker section instead of one big blob
-# per translation unit; -Wl,--gc-sections (link time) then lets the
-# linker discard whole sections nothing references. This matters a lot
-# here because most of the compiled code comes from two large
-# header-only template libraries (libosmium, nlohmann/json, see
-# src/vendor/) that get instantiated per translation unit regardless of
-# whether a given osmiumr command path ever actually calls them.
-# -Wl,-s strips symbol table and debug info from the final .so (a
-# separate axis from gc-sections: dead-code elimination removes
-# unreferenced code, stripping removes debugging metadata attached to
-# code that IS kept) -- see ../plan-reduce-size.md, where an unstripped
-# build here measured 19MB vs 5.4MB stripped, before any gc-sections
-# effect on top of that.
+# Size reduction -- see ../plan-reduce-size.md. -Wl,--strip-debug
+# removes debugging metadata from the final .so: measured 19MB
+# unstripped here, 8.1MB with just this flag.
+#
+# Tried and dropped: -ffunction-sections/-fdata-sections (compile time)
+# + -Wl,--gc-sections (link time), meant to let the linker discard
+# whole per-function/per-variable sections nothing references -- in
+# principle a big win given how much of the compiled code comes from
+# two large header-only template libraries (libosmium, nlohmann/json,
+# see src/vendor/) that get instantiated per translation unit
+# regardless of whether a given osmiumr command path ever actually
+# calls them. Measured essentially no size difference on top of
+# --strip-debug alone in this toolchain (the linker was apparently
+# already collapsing most of that via COMDAT folding), while
+# -ffunction-sections/-fdata-sections trips R CMD check's "checking
+# compilation flags in Makevars" portability WARNING regardless of
+# which PKG_*FLAGS variable it's placed in -- not worth carrying a
+# permanent WARNING for a flag pair with no measured benefit here.
+# Worth re-measuring if this package's vendored source grows enough
+# that per-function GC might start to matter (a different compiler/
+# linker than tested here could also behave differently).
+#
+# Deliberately --strip-debug, not a full --strip-all/-s: the latter
+# also strips the regular (non-debug) symbol table, which measured
+# smaller still (5.4MB) but broke R CMD check's own "checking compiled
+# code" step (it runs `nm` on the built .so looking for problem
+# symbols -- with none left to find, it can't do that check at all,
+# and reports so as a new NOTE). Same principle as not suppressing
+# compiler diagnostics via pragmas elsewhere in this package: don't
+# ship something that defeats CRAN's own ability to inspect the
+# compiled code, even in service of a smaller binary.
 
 # Explicit source list rather than $(wildcard ...): CRAN's portability
 # checks flag GNU Make extensions like $(wildcard ...) in package

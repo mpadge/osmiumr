@@ -15,14 +15,15 @@
 # ../plan-windows.md), these three need no detection at all: same paths
 # on every platform.
 
-PKG_CPPFLAGS = -Icompat -Ivendor/libosmium/include -Ivendor/nlohmann/include -Ivendor/protozero/include @osmiumr_cppflags@ -I. -ffunction-sections -fdata-sections
-PKG_LIBS = @osmiumr_libs@ -Wl,--gc-sections -Wl,-s
+PKG_CPPFLAGS = -Icompat -Ivendor/libosmium/include -Ivendor/nlohmann/include -Ivendor/protozero/include @osmiumr_cppflags@ -I.
+PKG_LIBS = @osmiumr_libs@ -Wl,--strip-debug
 
 CXX_STD = CXX17
 
-# See src/Makevars.in for why (-ffunction-sections/-fdata-sections +
-# -Wl,--gc-sections for dead-code elimination, -Wl,-s to strip debug
-# info) -- ../plan-reduce-size.md.
+# See src/Makevars.in for why just -Wl,--strip-debug (not a full strip,
+# not -ffunction-sections/-fdata-sections + -Wl,--gc-sections, which
+# measured no benefit here and trips an R CMD check portability
+# WARNING) -- ../plan-reduce-size.md.
 
 # Kept in sync by hand with src/osmium-tool/ -- see src/Makevars.in,
 # which this mirrors (the vendored source list is identical on every
