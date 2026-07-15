@@ -15,12 +15,12 @@
 #'   was reached at all), error (string or NULL), stdout (string), stderr
 #'   (string).
 osmiumr_run <- function(command, args) {
-    .Call(`_osmiumr_osmiumr_run`, command, args)
+    .Call('_osmiumr_osmiumr_run', PACKAGE = 'osmiumr', command, args)
 }
 
 #' List commands registered with the vendored osmium-tool CommandFactory
 #' @return character vector of command names
 osmiumr_registered_commands <- function() {
-    .Call(`_osmiumr_osmiumr_registered_commands`)
+    .Call('_osmiumr_osmiumr_registered_commands', PACKAGE = 'osmiumr')
 }
 
