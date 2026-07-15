@@ -16,8 +16,10 @@ License: GPL (>= 3) + file LICENSE.txt
 Encoding: UTF-8
 LazyData: true
 SystemRequirements: C++17, libosmium (>= 2.23.1), protozero (>= 1.6.3),
-    nlohmann-json (>= 3.0), boost-program-options (>= 1.55), bz2lib, zlib,
-    expat, cmake. Optionally lz4 for LZ4 PBF compression support.
+    nlohmann-json (>= 3.0), bz2lib, zlib, expat. Optionally lz4 for LZ4
+    PBF compression support. Unlike osmium-tool itself, no boost
+    installation is required; osmiumr bundles its own minimal
+    boost::program_options replacement (see src/compat/).
 Imports:
     Rcpp,
     jsonlite

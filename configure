@@ -4,9 +4,14 @@
 # Locates the system libraries osmium-tool's own CMakeLists.txt requires
 # (see osmium-tool/README.md / osmium-tool/CMakeLists.txt for the upstream
 # equivalent of these checks) and writes src/Makevars from
-# src/Makevars.in. There is no bundled copy of libosmium/protozero/boost/
-# etc. in this package; they must be installed on the system, same as for
-# building osmium-tool itself.
+# src/Makevars.in. There is no bundled copy of libosmium/protozero/etc. in
+# this package; they must be installed on the system, same as for building
+# osmium-tool itself. The one dependency osmium-tool itself needs but this
+# package does not is boost::program_options: osmiumr ships its own
+# header-only stand-in (src/compat/boost/program_options.hpp) for the
+# small subset of that API the vendored command_*.cpp setup() methods use,
+# so there is nothing to detect or link for Boost at all -- see that file
+# for the rationale.
 
 set -e
 
@@ -86,20 +91,6 @@ JSON_INC=$(find_header "nlohmann/json.hpp" "${NLOHMANN_INCLUDE_DIR}") \
     || fail "nlohmann-json headers not found. Install nlohmann-json (>= 3.0), e.g. 'apt install nlohmann-json3-dev', or set NLOHMANN_INCLUDE_DIR."
 echo "Found nlohmann-json in $JSON_INC"
 
-# --- boost::program_options (headers + compiled lib) ---------------------
-BOOST_INC=$(find_header "boost/program_options.hpp" "${BOOST_INCLUDE_DIR}") \
-    || fail "boost/program_options.hpp not found. Install libboost-program-options-dev (>= 1.55), or set BOOST_INCLUDE_DIR."
-BOOST_VERSION_RAW=$(sed -n 's/^#define BOOST_VERSION \([0-9]*\).*/\1/p' "$BOOST_INC/boost/version.hpp")
-BOOST_VERSION_MAJOR=$((BOOST_VERSION_RAW / 100000))
-BOOST_VERSION_MINOR=$(((BOOST_VERSION_RAW / 100) % 1000))
-echo "Found boost ${BOOST_VERSION_MAJOR}.${BOOST_VERSION_MINOR} headers in $BOOST_INC"
-if [ "$BOOST_VERSION_MAJOR" -lt 1 ] || { [ "$BOOST_VERSION_MAJOR" -eq 1 ] && [ "$BOOST_VERSION_MINOR" -lt 55 ]; }; then
-    fail "boost >= 1.55 required, found ${BOOST_VERSION_MAJOR}.${BOOST_VERSION_MINOR}"
-fi
-BOOST_LIB_DIR=$(find_lib "boost_program_options" || find_lib "boost_program_options-mt") \
-    || fail "libboost_program_options not found. Install libboost-program-options-dev, or set BOOST_LIB_DIR."
-echo "Found libboost_program_options in $BOOST_LIB_DIR"
-
 # --- bz2, zlib, expat ------------------------------------------------------
 BZ2_INC=$(find_header "bzlib.h") || fail "bzlib.h not found. Install libbz2-dev."
 BZ2_LIB_DIR=$(find_lib "bz2") || fail "libbz2 not found. Install libbz2-dev."
@@ -125,8 +116,8 @@ else
     LZ4_CPPFLAGS=""
 fi
 
-PKG_CPPFLAGS="-I$OSMIUM_INC -I$PROTOZERO_INC -I$JSON_INC -I$BOOST_INC -I$BZ2_INC -I$ZLIB_INC -I$EXPAT_INC $LZ4_CPPFLAGS $LZ4_DEFS -DBOOST_ALL_NO_LIB"
-PKG_LIBS="-L$BOOST_LIB_DIR -lboost_program_options -L$BZ2_LIB_DIR -lbz2 -L$ZLIB_LIB_DIR -lz -L$EXPAT_LIB_DIR -lexpat $LZ4_LIBS -lpthread"
+PKG_CPPFLAGS="-I$OSMIUM_INC -I$PROTOZERO_INC -I$JSON_INC -I$BZ2_INC -I$ZLIB_INC -I$EXPAT_INC $LZ4_CPPFLAGS $LZ4_DEFS"
+PKG_LIBS="-L$BZ2_LIB_DIR -lbz2 -L$ZLIB_LIB_DIR -lz -L$EXPAT_LIB_DIR -lexpat $LZ4_LIBS -lpthread"
 
 echo "PKG_CPPFLAGS=$PKG_CPPFLAGS"
 echo "PKG_LIBS=$PKG_LIBS"
