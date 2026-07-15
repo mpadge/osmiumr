@@ -206,7 +206,26 @@ namespace osmium {
 
                 void write_counter(int width, int n) {
                     write_color(color_white);
-                    output_formatted("    %0*d: ", width, n++);
+                    // osmiumr note: was `output_formatted("    %0*d: ", width,
+                    // n++);` -- a printf-style call with a runtime ("*")
+                    // field width. GCC's -Wformat-truncation can't prove
+                    // `width` (ultimately derived from a collection size,
+                    // see print_width() above) is bounded, so it assumes
+                    // the worst case (up to INT_MAX bytes of output) and
+                    // warns. That's a false positive here in practice, but
+                    // rather than suppress the warning (which R CMD check's
+                    // "checking pragmas" step flags as hiding diagnostics),
+                    // this avoids the dynamic-width printf specifier
+                    // entirely by zero-padding with plain std::string
+                    // operations, matching the style already used
+                    // throughout this class (`*m_out += ...`).
+                    std::string number = std::to_string(n);
+                    if (static_cast<int>(number.size()) < width) {
+                        number.insert(0, static_cast<std::string::size_type>(width - static_cast<int>(number.size())), '0');
+                    }
+                    *m_out += "    ";
+                    *m_out += number;
+                    *m_out += ": ";
                     write_color(color_reset);
                 }
 
