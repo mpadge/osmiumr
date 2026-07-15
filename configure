@@ -46,6 +46,18 @@ if command -v brew >/dev/null 2>&1; then
     fi
 fi
 
+# zlib and expat are macOS system libraries: their .dylib still lives in
+# /usr/lib (already a candidate above), but since Catalina Apple no
+# longer ships their headers under /usr/include -- they only exist
+# inside the active Xcode/Command Line Tools SDK sysroot. Ask xcrun for
+# that SDK path and add its usr/include.
+if command -v xcrun >/dev/null 2>&1; then
+    SDK_PATH=$(xcrun --show-sdk-path 2>/dev/null || true)
+    if [ -n "$SDK_PATH" ]; then
+        CANDIDATE_INCLUDE_DIRS="$CANDIDATE_INCLUDE_DIRS $SDK_PATH/usr/include"
+    fi
+fi
+
 fail() {
     echo "*** configure: $1" >&2
     exit 1
