@@ -33,6 +33,19 @@ CXXFLAGS=$(${R_HOME}/bin/R CMD config CXX17FLAGS 2>/dev/null || ${R_HOME}/bin/R 
 CANDIDATE_INCLUDE_DIRS="/usr/include /usr/local/include /opt/homebrew/include /opt/local/include"
 CANDIDATE_LIB_DIRS="/usr/lib /usr/lib64 /usr/local/lib /opt/homebrew/lib /opt/local/lib /usr/lib/x86_64-linux-gnu"
 
+# Homebrew's bzip2 formula is keg-only on macOS (the OS already ships a
+# bzip2, so brew won't symlink its own into the standard prefix), so
+# `brew install bzip2` alone leaves bzlib.h/libbz2 outside
+# CANDIDATE_INCLUDE_DIRS/CANDIDATE_LIB_DIRS above. Ask brew directly for
+# its keg-only prefix and add that too.
+if command -v brew >/dev/null 2>&1; then
+    BZ2_BREW_PREFIX=$(brew --prefix bzip2 2>/dev/null || true)
+    if [ -n "$BZ2_BREW_PREFIX" ]; then
+        CANDIDATE_INCLUDE_DIRS="$CANDIDATE_INCLUDE_DIRS $BZ2_BREW_PREFIX/include"
+        CANDIDATE_LIB_DIRS="$CANDIDATE_LIB_DIRS $BZ2_BREW_PREFIX/lib"
+    fi
+fi
+
 fail() {
     echo "*** configure: $1" >&2
     exit 1
