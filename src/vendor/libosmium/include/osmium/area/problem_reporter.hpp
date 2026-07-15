@@ -101,11 +101,6 @@ namespace osmium {
                 m_nodes = nodes;
             }
 
-// Disable "unused-parameter" warning, so that the compiler will not complain.
-// We can't remove the parameter names, because then doxygen will complain.
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
             /**
              * Report a duplicate node, ie. two nodes with the same location.
              *
@@ -236,8 +231,6 @@ namespace osmium {
              */
             virtual void report_way(const osmium::Way& way) {
             }
-
-#pragma GCC diagnostic pop
 
         }; // class ProblemReporter
 
