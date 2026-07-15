@@ -8,21 +8,31 @@
 # real Boost that might also be present on the include path -- see that
 # file for why a real boost::program_options is not used.
 #
-# The three -isystem vendor/... entries are libosmium/nlohmann-json/
-# protozero, vendored verbatim under src/vendor/ (see
-# src/vendor/README.md) rather than detected on the system -- unlike
-# @osmiumr_cppflags@ below, these paths are the same on every platform,
-# which is what makes Windows builds possible at all for these three
-# (see ../plan-windows.md). -isystem rather than -I: these are
-# third-party headers we don't control, so compiler warnings that
-# originate inside them (e.g. nlohmann/json's own -Wdeprecated-
-# declarations noise on newer libc++) are suppressed rather than
-# surfaced as if they were osmiumr's own code.
+# The three -Ivendor/... entries are libosmium/nlohmann-json/protozero,
+# vendored verbatim under src/vendor/ (see src/vendor/README.md) rather
+# than detected on the system -- unlike @osmiumr_cppflags@ below, these
+# paths are the same on every platform, which is what makes Windows
+# builds possible at all for these three (see ../plan-windows.md).
 
-PKG_CPPFLAGS = -Icompat -isystem vendor/libosmium/include -isystem vendor/nlohmann/include -isystem vendor/protozero/include @osmiumr_cppflags@ -I.
-PKG_LIBS = @osmiumr_libs@
+PKG_CPPFLAGS = -Icompat -Ivendor/libosmium/include -Ivendor/nlohmann/include -Ivendor/protozero/include @osmiumr_cppflags@ -I. -ffunction-sections -fdata-sections
+PKG_LIBS = @osmiumr_libs@ -Wl,--gc-sections -Wl,-s
 
 CXX_STD = CXX17
+
+# -ffunction-sections/-fdata-sections (above, compile time) put each
+# function/variable in its own linker section instead of one big blob
+# per translation unit; -Wl,--gc-sections (link time) then lets the
+# linker discard whole sections nothing references. This matters a lot
+# here because most of the compiled code comes from two large
+# header-only template libraries (libosmium, nlohmann/json, see
+# src/vendor/) that get instantiated per translation unit regardless of
+# whether a given osmiumr command path ever actually calls them.
+# -Wl,-s strips symbol table and debug info from the final .so (a
+# separate axis from gc-sections: dead-code elimination removes
+# unreferenced code, stripping removes debugging metadata attached to
+# code that IS kept) -- see ../plan-reduce-size.md, where an unstripped
+# build here measured 19MB vs 5.4MB stripped, before any gc-sections
+# effect on top of that.
 
 # Explicit source list rather than $(wildcard ...): CRAN's portability
 # checks flag GNU Make extensions like $(wildcard ...) in package
