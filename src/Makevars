@@ -8,8 +8,8 @@
 # real Boost that might also be present on the include path -- see that
 # file for why a real boost::program_options is not used.
 
-PKG_CPPFLAGS = -Icompat @osmiumr_cppflags@ -I.
-PKG_LIBS = @osmiumr_libs@
+PKG_CPPFLAGS = -Icompat -I/usr/include -I/usr/include -I/usr/include -I/usr/include -I/usr/include -I/usr/include -I/usr/include -DOSMIUM_WITH_LZ4 -I.
+PKG_LIBS = -L/usr/lib -lbz2 -L/usr/lib -lz -L/usr/lib -lexpat -L/usr/lib -llz4 -lpthread
 
 CXX_STD = CXX17
 
