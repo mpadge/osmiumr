@@ -1,16 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-<!-- badges: start -->
-
-[![R CMD
-check](https://github.com/mpadge/osmiumr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mpadge/osmiumr/actions/workflows/R-CMD-check.yaml)
-[![codecov](https://codecov.io/gh/mpadge/osmiumr/branch/main/graph/badge.svg)](https://app.codecov.io/gh/mpadge/osmiumr)
-[![Project Status:
-WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
-
-<!-- badges: end -->
-
 # osmiumr
 
 <!-- badges: start -->
@@ -18,6 +8,8 @@ WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.o
 [![R-CMD-check](https://github.com/mpadge/osmiumr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mpadge/osmiumr/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/mpadge/osmiumr/branch/main/graph/badge.svg)](https://codecov.io/gh/mpadge/osmiumr)
+[![Project Status:
+WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 <!-- badges: end -->
 
 R bindings for [`osmium-tool`](https://osmcode.org/osmium-tool/), a
@@ -55,11 +47,11 @@ osmextract::oe_download(
   download_directory = tempdir(),
   quiet = TRUE
 )
-#> [1] "/tmp/RtmpEyPxNF/test_its-example.osm.pbf"
+#> [1] "/tmp/RtmpwlwNG1/test_its-example.osm.pbf"
 
 f <- fs::dir_ls(tempdir(), regexp = "\\.osm\\.pbf$")
 f
-#> /tmp/RtmpEyPxNF/test_its-example.osm.pbf
+#> /tmp/RtmpwlwNG1/test_its-example.osm.pbf
 ```
 
 `osmium_fileinfo()` reports header and content summary information,

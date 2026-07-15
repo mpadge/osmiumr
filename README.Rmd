@@ -14,21 +14,13 @@ knitr::opts_chunk$set(
 ```
 
 
-<!-- badges: start -->
-
-[![R CMD check](https://github.com/mpadge/osmiumr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mpadge/osmiumr/actions/workflows/R-CMD-check.yaml)
-[![codecov](https://codecov.io/gh/mpadge/osmiumr/branch/main/graph/badge.svg)](https://app.codecov.io/gh/mpadge/osmiumr)
-[![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
-
-
-<!-- badges: end -->
-
 
 # osmiumr
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/mpadge/osmiumr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mpadge/osmiumr/actions/workflows/R-CMD-check.yaml)
 [![Codecov test coverage](https://codecov.io/gh/mpadge/osmiumr/branch/main/graph/badge.svg)](https://codecov.io/gh/mpadge/osmiumr)
+[![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 <!-- badges: end -->
 
 R bindings for [`osmium-tool`](https://osmcode.org/osmium-tool/), a
