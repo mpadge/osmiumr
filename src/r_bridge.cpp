@@ -55,9 +55,17 @@ namespace {
 class StdFdCapture {
 public:
     StdFdCapture() {
+        // osmiumr note: upstream (our own r_bridge.cpp) also had explicit
+        // std::cout.flush()/std::cerr.flush() calls here. Removed: they
+        // were the only two remaining std::cout/std::cerr symbol
+        // references in this file (see plan-cout.md Step 2) and are
+        // redundant with std::fflush(nullptr) below -- sync_with_stdio is
+        // never disabled anywhere in this package (grep -rn
+        // "sync_with_stdio" src/ returns nothing), so std::cout/std::cerr
+        // share their buffer with C stdio's stdout/stderr, meaning
+        // std::fflush(nullptr) (which flushes every open C stdio stream)
+        // already flushes any pending std::cout/std::cerr content too.
         std::fflush(nullptr);
-        std::cout.flush();
-        std::cerr.flush();
 
         saved_stdout_ = OSMIUMR_DUP(1);
         saved_stderr_ = OSMIUMR_DUP(2);
@@ -100,8 +108,6 @@ public:
             return;
         }
         std::fflush(nullptr);
-        std::cout.flush();
-        std::cerr.flush();
         if (saved_stdout_ >= 0) {
             OSMIUMR_DUP2(saved_stdout_, 1);
         }
