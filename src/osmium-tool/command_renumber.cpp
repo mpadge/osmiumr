@@ -54,6 +54,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 #include <vector>
 
+#include <Rcpp.h> // MP: Added for R pkg to replace Rcpp::Rcout with Rcpp::Rcout
+
 #ifdef _WIN32
 # include <io.h>
 #endif
@@ -108,7 +110,7 @@ void id_map::print(osmium::object_id_type new_id) {
     }
 
     for (const auto& id : m_ids) {
-        std::cout << id << ' ' << new_id << '\n';
+        Rcpp::Rcout << id << ' ' << new_id << '\n';
         if (new_id > 0) {
             ++new_id;
         } else {

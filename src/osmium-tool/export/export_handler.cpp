@@ -37,6 +37,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <string>
 #include <utility>
 
+#include <Rcpp.h> // MP: Added for R pkg to replace std::cout with Rcpp::Rcout
+
 namespace {
 
 bool check_conditions(const osmium::TagList& tags, const Ruleset& r1, const Ruleset& r2, bool is_no) noexcept {
@@ -87,7 +89,7 @@ void ExportHandler::show_error(const std::runtime_error& error) {
     }
     ++m_error_count;
     if (m_show_errors) {
-        std::cerr << "Geometry error: " << error.what() << '\n';
+        Rcpp::Rcerr << "Geometry error: " << error.what() << '\n';
     }
 }
 

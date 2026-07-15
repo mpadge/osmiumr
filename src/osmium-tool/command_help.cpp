@@ -27,6 +27,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 
+#include <Rcpp.h> // MP: Added for R pkg to replace Rcpp::Rcout with Rcpp::Rcout
+
 // osmiumr note: upstream osmium-tool execlp()'s into `man` here to show a
 // man page on non-Windows systems. Replacing the current process image
 // with `man` is not safe when this code is compiled into a long-running
@@ -42,9 +44,9 @@ bool CommandHelp::setup(const std::vector<std::string>& arguments) {
 namespace {
 
 void show_help(const std::string& topic, const std::string& info) {
-    std::cout << info << "\n";
-    std::cout << "You'll find more documentation at https://osmcode.org/osmium-tool/\n";
-    std::cout << "(man page 'osmium-" << topic << "' not shown: osmiumr runs in-process and does not exec external pagers)\n";
+    Rcpp::Rcout << info << "\n";
+    Rcpp::Rcout << "You'll find more documentation at https://osmcode.org/osmium-tool/\n";
+    Rcpp::Rcout << "(man page 'osmium-" << topic << "' not shown: osmiumr runs in-process and does not exec external pagers)\n";
 }
 
 } // anonymous namespace
@@ -53,12 +55,12 @@ bool CommandHelp::run() {
     const auto commands = m_command_factory.help();
 
     if (m_topic == "help") {
-        std::cout << "Usage: " << synopsis()
+        Rcpp::Rcout << "Usage: " << synopsis()
                   << "\n\nCOMMANDS:\n";
 
         // print command names and descriptions in a nice table
         for (const auto& cmd : commands) {
-            std::cout << "  "
+            Rcpp::Rcout << "  "
                       << std::setw(m_command_factory.max_command_name_length())
                       << std::left
                       << cmd.first
@@ -68,12 +70,12 @@ bool CommandHelp::run() {
                       << "\n";
         }
 
-        std::cout << "\nTOPICS:\n"
+        Rcpp::Rcout << "\nTOPICS:\n"
                      "  file-formats            File formats supported by Osmium\n"
                      "  index-types             Index types for storing node locations\n"
                      "  output-headers          Header options that can be set on output files\n";
 
-        std::cout << "\nUse 'osmium COMMAND -h' for short usage information.\n"
+        Rcpp::Rcout << "\nUse 'osmium COMMAND -h' for short usage information.\n"
                      "Use 'osmium help COMMAND' for detailed information on a specific command.\n"
                      "Use 'osmium help TOPIC' for detailed information on a specific topic.\n";
         return true;
@@ -100,7 +102,7 @@ bool CommandHelp::run() {
         return true;
     }
 
-    std::cerr << "Unknown help topic '" << m_topic << "'.\n";
+    Rcpp::Rcerr << "Unknown help topic '" << m_topic << "'.\n";
     return false;
 }
 

@@ -57,6 +57,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 #include <vector>
 
+#include <Rcpp.h> // MP: Added for R pkg to replace Rcpp::Rcout with Rcpp::Rcout
+
 #ifndef _WIN32
 # include <unistd.h>
 #endif
@@ -236,96 +238,96 @@ class HumanReadableOutput : public Output {
 public:
 
     void file(const std::string& input_filename, const osmium::io::File& input_file) final {
-        std::cout << "File:\n";
-        std::cout << "  Name: " << input_filename << "\n";
-        std::cout << "  Format: " << input_file.format() << "\n";
-        std::cout << "  Compression: " << input_file.compression() << "\n";
+        Rcpp::Rcout << "File:\n";
+        Rcpp::Rcout << "  Name: " << input_filename << "\n";
+        Rcpp::Rcout << "  Format: " << input_file.format() << "\n";
+        Rcpp::Rcout << "  Compression: " << input_file.compression() << "\n";
 
         if (!input_file.filename().empty()) {
-            std::cout << "  Size: " << file_size(input_file) << "\n";
+            Rcpp::Rcout << "  Size: " << file_size(input_file) << "\n";
         }
     }
 
     void header(const osmium::io::Header& header) final {
-        std::cout << "Header:\n";
+        Rcpp::Rcout << "Header:\n";
 
-        std::cout << "  Bounding boxes:\n";
+        Rcpp::Rcout << "  Bounding boxes:\n";
         for (const auto& box : header.boxes()) {
-            std::cout << "    " << box << "\n";
+            Rcpp::Rcout << "    " << box << "\n";
         }
-        std::cout << "  With history: " << yes_no(header.has_multiple_object_versions());
+        Rcpp::Rcout << "  With history: " << yes_no(header.has_multiple_object_versions());
 
-        std::cout << "  Options:\n";
+        Rcpp::Rcout << "  Options:\n";
         for (const auto& option : header) {
-            std::cout << "    " << option.first << "=" << option.second << "\n";
+            Rcpp::Rcout << "    " << option.first << "=" << option.second << "\n";
         }
     }
 
     void data(const osmium::io::Header& header, const InfoHandler& info_handler) final {
-        std::cout << "Data:\n";
-        std::cout << "  Bounding box: " << info_handler.bounds << "\n";
+        Rcpp::Rcout << "Data:\n";
+        Rcpp::Rcout << "  Bounding box: " << info_handler.bounds << "\n";
 
         if (info_handler.first_timestamp() != osmium::end_of_time()) {
-            std::cout << "  Timestamps:\n";
-            std::cout << "    First: " << info_handler.first_timestamp() << "\n";
-            std::cout << "    Last: " << info_handler.last_timestamp() << "\n";
+            Rcpp::Rcout << "  Timestamps:\n";
+            Rcpp::Rcout << "    First: " << info_handler.first_timestamp() << "\n";
+            Rcpp::Rcout << "    Last: " << info_handler.last_timestamp() << "\n";
         }
 
-        std::cout << "  Objects ordered (by type and id): " << yes_no(info_handler.ordered);
+        Rcpp::Rcout << "  Objects ordered (by type and id): " << yes_no(info_handler.ordered);
 
-        std::cout << "  Multiple versions of same object: ";
+        Rcpp::Rcout << "  Multiple versions of same object: ";
         if (info_handler.ordered) {
-            std::cout << yes_no(info_handler.multiple_versions);
+            Rcpp::Rcout << yes_no(info_handler.multiple_versions);
             if (info_handler.multiple_versions != header.has_multiple_object_versions()) {
-                std::cout << "    WARNING! This is different from the setting in the header.\n";
+                Rcpp::Rcout << "    WARNING! This is different from the setting in the header.\n";
             }
         } else {
-            std::cout << "unknown (because objects in file are unordered)\n";
+            Rcpp::Rcout << "unknown (because objects in file are unordered)\n";
         }
 
         if (calculate_crc()) {
-            std::cout << "  CRC32: " << std::hex << info_handler.crc32().checksum() << std::dec << "\n";
+            Rcpp::Rcout << "  CRC32: " << std::hex << info_handler.crc32().checksum() << std::dec << "\n";
         } else {
-            std::cout << "  CRC32: not calculated (use --crc/-c to enable)\n";
+            Rcpp::Rcout << "  CRC32: not calculated (use --crc/-c to enable)\n";
         }
 
-        std::cout << "  Number of changesets: " << info_handler.changesets << "\n";
-        std::cout << "  Number of nodes: "      << info_handler.nodes      << "\n";
-        std::cout << "  Number of ways: "       << info_handler.ways       << "\n";
-        std::cout << "  Number of relations: "  << info_handler.relations  << "\n";
+        Rcpp::Rcout << "  Number of changesets: " << info_handler.changesets << "\n";
+        Rcpp::Rcout << "  Number of nodes: "      << info_handler.nodes      << "\n";
+        Rcpp::Rcout << "  Number of ways: "       << info_handler.ways       << "\n";
+        Rcpp::Rcout << "  Number of relations: "  << info_handler.relations  << "\n";
 
-        std::cout << "  Smallest changeset ID: " << get_smallest(info_handler.smallest_changeset_id()) << "\n";
-        std::cout << "  Smallest node ID: "      << get_smallest(info_handler.smallest_node_id())      << "\n";
-        std::cout << "  Smallest way ID: "       << get_smallest(info_handler.smallest_way_id())       << "\n";
-        std::cout << "  Smallest relation ID: "  << get_smallest(info_handler.smallest_relation_id())  << "\n";
+        Rcpp::Rcout << "  Smallest changeset ID: " << get_smallest(info_handler.smallest_changeset_id()) << "\n";
+        Rcpp::Rcout << "  Smallest node ID: "      << get_smallest(info_handler.smallest_node_id())      << "\n";
+        Rcpp::Rcout << "  Smallest way ID: "       << get_smallest(info_handler.smallest_way_id())       << "\n";
+        Rcpp::Rcout << "  Smallest relation ID: "  << get_smallest(info_handler.smallest_relation_id())  << "\n";
 
-        std::cout << "  Largest changeset ID: " << get_largest(info_handler.largest_changeset_id()) << "\n";
-        std::cout << "  Largest node ID: "      << get_largest(info_handler.largest_node_id())      << "\n";
-        std::cout << "  Largest way ID: "       << get_largest(info_handler.largest_way_id())       << "\n";
-        std::cout << "  Largest relation ID: "  << get_largest(info_handler.largest_relation_id())  << "\n";
+        Rcpp::Rcout << "  Largest changeset ID: " << get_largest(info_handler.largest_changeset_id()) << "\n";
+        Rcpp::Rcout << "  Largest node ID: "      << get_largest(info_handler.largest_node_id())      << "\n";
+        Rcpp::Rcout << "  Largest way ID: "       << get_largest(info_handler.largest_way_id())       << "\n";
+        Rcpp::Rcout << "  Largest relation ID: "  << get_largest(info_handler.largest_relation_id())  << "\n";
 
         const auto num_objects = info_handler.changesets + info_handler.nodes + info_handler.ways + info_handler.relations;
-        std::cout << "  Number of buffers: " << info_handler.buffers_count;
+        Rcpp::Rcout << "  Number of buffers: " << info_handler.buffers_count;
         if (num_objects != 0) {
-            std::cout << " (avg " << (num_objects / info_handler.buffers_count) << " objects per buffer)\n";
+            Rcpp::Rcout << " (avg " << (num_objects / info_handler.buffers_count) << " objects per buffer)\n";
         } else {
-            std::cout << '\n';
+            Rcpp::Rcout << '\n';
         }
 
-        std::cout << "  Sum of buffer sizes: " << info_handler.buffers_size
+        Rcpp::Rcout << "  Sum of buffer sizes: " << info_handler.buffers_size
                   << " (" << show_gbytes(info_handler.buffers_size) << " GB)\n";
 
         if (info_handler.buffers_capacity != 0) {
             const auto fill_factor = std::round(100 * static_cast<double>(info_handler.buffers_size) / static_cast<double>(info_handler.buffers_capacity));
-            std::cout << "  Sum of buffer capacities: " << info_handler.buffers_capacity
+            Rcpp::Rcout << "  Sum of buffer capacities: " << info_handler.buffers_capacity
                       << " (" << show_gbytes(info_handler.buffers_capacity) << " GB, " << fill_factor << "% full)\n";
         } else {
-            std::cout << "  Sum of buffer capacities: 0 (0 GB)\n";
+            Rcpp::Rcout << "  Sum of buffer capacities: 0 (0 GB)\n";
         }
 
-        std::cout << "Metadata:\n";
-        std::cout << "  All objects have following metadata attributes: " << info_handler.metadata_all_objects  << "\n";
-        std::cout << "  Some objects have following metadata attributes: " << info_handler.metadata_some_objects  << "\n";
+        Rcpp::Rcout << "Metadata:\n";
+        Rcpp::Rcout << "  All objects have following metadata attributes: " << info_handler.metadata_all_objects  << "\n";
+        Rcpp::Rcout << "  Some objects have following metadata attributes: " << info_handler.metadata_some_objects  << "\n";
     }
 
 }; // class HumanReadableOutput
@@ -446,7 +448,7 @@ public:
     }
 
     void output() final {
-        std::cout << std::setw(4) << m_json << "\n";
+        Rcpp::Rcout << std::setw(4) << m_json << "\n";
     }
 
 }; // class JSONOutput
@@ -463,22 +465,22 @@ public:
 
     void file(const std::string& input_filename, const osmium::io::File& input_file) final {
         if (m_get_value == "file.name") {
-            std::cout << input_filename << "\n";
+            Rcpp::Rcout << input_filename << "\n";
             return;
         }
         if (m_get_value == "file.format") {
-            std::cout << input_file.format() << "\n";
+            Rcpp::Rcout << input_file.format() << "\n";
             return;
         }
         if (m_get_value == "file.compression") {
-            std::cout << input_file.compression() << "\n";
+            Rcpp::Rcout << input_file.compression() << "\n";
             return;
         }
         if (m_get_value == "file.size") {
             if (input_file.filename().empty()) {
-                std::cout << 0 << "\n";
+                Rcpp::Rcout << 0 << "\n";
             } else {
-                std::cout << file_size(input_file) << "\n";
+                Rcpp::Rcout << file_size(input_file) << "\n";
             }
             return;
         }
@@ -487,12 +489,12 @@ public:
     void header(const osmium::io::Header& header) final {
         if (m_get_value == "header.boxes") {
             for (const auto& box : header.boxes()) {
-                std::cout << box << "\n";
+                Rcpp::Rcout << box << "\n";
             }
         }
 
         if (m_get_value == "header.with_history") {
-            std::cout << yes_no(header.has_multiple_object_versions());
+            Rcpp::Rcout << yes_no(header.has_multiple_object_versions());
             return;
         }
 
@@ -500,156 +502,156 @@ public:
             std::string value_name{"header.option."};
             value_name.append(option.first);
             if (m_get_value == value_name) {
-                std::cout << option.second << "\n";
+                Rcpp::Rcout << option.second << "\n";
             }
         }
     }
 
     void data(const osmium::io::Header& /*header*/, const InfoHandler& info_handler) final {
         if (m_get_value == "data.bbox") {
-            std::cout << info_handler.bounds << "\n";
+            Rcpp::Rcout << info_handler.bounds << "\n";
             return;
         }
 
         if (m_get_value == "data.timestamp.first") {
             if (info_handler.first_timestamp() == osmium::end_of_time()) {
-                std::cout << "\n";
+                Rcpp::Rcout << "\n";
             } else {
-                std::cout << info_handler.first_timestamp() << "\n";
+                Rcpp::Rcout << info_handler.first_timestamp() << "\n";
             }
             return;
         }
 
         if (m_get_value == "data.timestamp.last") {
             if (info_handler.first_timestamp() == osmium::end_of_time()) {
-                std::cout << "\n";
+                Rcpp::Rcout << "\n";
             } else {
-                std::cout << info_handler.last_timestamp() << "\n";
+                Rcpp::Rcout << info_handler.last_timestamp() << "\n";
             }
             return;
         }
 
         if (m_get_value == "data.objects_ordered") {
-            std::cout << (info_handler.ordered ? "yes\n" : "no\n");
+            Rcpp::Rcout << (info_handler.ordered ? "yes\n" : "no\n");
             return;
         }
 
         if (m_get_value == "data.multiple_versions") {
             if (info_handler.ordered) {
-                std::cout << (info_handler.multiple_versions ? "yes\n" : "no\n");
+                Rcpp::Rcout << (info_handler.multiple_versions ? "yes\n" : "no\n");
             } else {
-                std::cout << "unknown\n";
+                Rcpp::Rcout << "unknown\n";
             }
             return;
         }
 
         if (m_get_value == "data.crc32") {
-            std::cout << std::hex << info_handler.crc32().checksum() << std::dec << "\n";
+            Rcpp::Rcout << std::hex << info_handler.crc32().checksum() << std::dec << "\n";
             return;
         }
 
         if (m_get_value == "data.count.changesets") {
-            std::cout << info_handler.changesets << "\n";
+            Rcpp::Rcout << info_handler.changesets << "\n";
             return;
         }
         if (m_get_value == "data.count.nodes") {
-            std::cout << info_handler.nodes << "\n";
+            Rcpp::Rcout << info_handler.nodes << "\n";
             return;
         }
         if (m_get_value == "data.count.ways") {
-            std::cout << info_handler.ways << "\n";
+            Rcpp::Rcout << info_handler.ways << "\n";
             return;
         }
         if (m_get_value == "data.count.relations") {
-            std::cout << info_handler.relations << "\n";
+            Rcpp::Rcout << info_handler.relations << "\n";
             return;
         }
 
         if (m_get_value == "data.minid.changesets") {
-            std::cout << get_smallest(info_handler.smallest_changeset_id()) << "\n";
+            Rcpp::Rcout << get_smallest(info_handler.smallest_changeset_id()) << "\n";
             return;
         }
         if (m_get_value == "data.minid.nodes") {
-            std::cout << get_smallest(info_handler.smallest_node_id()) << "\n";
+            Rcpp::Rcout << get_smallest(info_handler.smallest_node_id()) << "\n";
             return;
         }
         if (m_get_value == "data.minid.ways") {
-            std::cout << get_smallest(info_handler.smallest_way_id()) << "\n";
+            Rcpp::Rcout << get_smallest(info_handler.smallest_way_id()) << "\n";
             return;
         }
         if (m_get_value == "data.minid.relations") {
-            std::cout << get_smallest(info_handler.smallest_relation_id()) << "\n";
+            Rcpp::Rcout << get_smallest(info_handler.smallest_relation_id()) << "\n";
             return;
         }
 
         if (m_get_value == "data.maxid.changesets") {
-            std::cout << get_largest(info_handler.largest_changeset_id()) << "\n";
+            Rcpp::Rcout << get_largest(info_handler.largest_changeset_id()) << "\n";
             return;
         }
         if (m_get_value == "data.maxid.nodes") {
-            std::cout << get_largest(info_handler.largest_node_id()) << "\n";
+            Rcpp::Rcout << get_largest(info_handler.largest_node_id()) << "\n";
             return;
         }
         if (m_get_value == "data.maxid.ways") {
-            std::cout << get_largest(info_handler.largest_way_id()) << "\n";
+            Rcpp::Rcout << get_largest(info_handler.largest_way_id()) << "\n";
             return;
         }
         if (m_get_value == "data.maxid.relations") {
-            std::cout << get_largest(info_handler.largest_relation_id()) << "\n";
+            Rcpp::Rcout << get_largest(info_handler.largest_relation_id()) << "\n";
             return;
         }
 
         if (m_get_value == "data.buffers.count") {
-            std::cout << info_handler.buffers_count << "\n";
+            Rcpp::Rcout << info_handler.buffers_count << "\n";
             return;
         }
         if (m_get_value == "data.buffers.size") {
-            std::cout << info_handler.buffers_size << "\n";
+            Rcpp::Rcout << info_handler.buffers_size << "\n";
             return;
         }
         if (m_get_value == "data.buffers.capacity") {
-            std::cout << info_handler.buffers_capacity << "\n";
+            Rcpp::Rcout << info_handler.buffers_capacity << "\n";
             return;
         }
 
         if (m_get_value == "metadata.all_objects.version") {
-            std::cout << (info_handler.metadata_all_objects.version() ? "yes\n" : "no\n");
+            Rcpp::Rcout << (info_handler.metadata_all_objects.version() ? "yes\n" : "no\n");
             return;
         }
         if (m_get_value == "metadata.all_objects.timestamp") {
-            std::cout << (info_handler.metadata_all_objects.timestamp() ? "yes\n" : "no\n");
+            Rcpp::Rcout << (info_handler.metadata_all_objects.timestamp() ? "yes\n" : "no\n");
             return;
         }
         if (m_get_value == "metadata.all_objects.changeset") {
-            std::cout << (info_handler.metadata_all_objects.changeset() ? "yes\n" : "no\n");
+            Rcpp::Rcout << (info_handler.metadata_all_objects.changeset() ? "yes\n" : "no\n");
             return;
         }
         if (m_get_value == "metadata.all_objects.uid") {
-            std::cout << (info_handler.metadata_all_objects.uid() ? "yes\n" : "no\n");
+            Rcpp::Rcout << (info_handler.metadata_all_objects.uid() ? "yes\n" : "no\n");
             return;
         }
         if (m_get_value == "metadata.all_objects.user") {
-            std::cout << (info_handler.metadata_all_objects.user() ? "yes\n" : "no\n");
+            Rcpp::Rcout << (info_handler.metadata_all_objects.user() ? "yes\n" : "no\n");
             return;
         }
         if (m_get_value == "metadata.some_objects.version") {
-            std::cout << (info_handler.metadata_some_objects.version() ? "yes\n" : "no\n");
+            Rcpp::Rcout << (info_handler.metadata_some_objects.version() ? "yes\n" : "no\n");
             return;
         }
         if (m_get_value == "metadata.some_objects.timestamp") {
-            std::cout << (info_handler.metadata_some_objects.timestamp() ? "yes\n" : "no\n");
+            Rcpp::Rcout << (info_handler.metadata_some_objects.timestamp() ? "yes\n" : "no\n");
             return;
         }
         if (m_get_value == "metadata.some_objects.changeset") {
-            std::cout << (info_handler.metadata_some_objects.changeset() ? "yes\n" : "no\n");
+            Rcpp::Rcout << (info_handler.metadata_some_objects.changeset() ? "yes\n" : "no\n");
             return;
         }
         if (m_get_value == "metadata.some_objects.uid") {
-            std::cout << (info_handler.metadata_some_objects.uid() ? "yes\n" : "no\n");
+            Rcpp::Rcout << (info_handler.metadata_some_objects.uid() ? "yes\n" : "no\n");
             return;
         }
         if (m_get_value == "metadata.some_objects.user") {
-            std::cout << (info_handler.metadata_some_objects.user() ? "yes\n" : "no\n");
+            Rcpp::Rcout << (info_handler.metadata_some_objects.user() ? "yes\n" : "no\n");
             return;
         }
     }
@@ -762,7 +764,7 @@ bool CommandFileinfo::setup(const std::vector<std::string>& arguments) {
     };
 
     if (vm.count("show-variables")) {
-        std::copy(known_values.cbegin(), known_values.cend(), std::ostream_iterator<std::string>(std::cout, "\n"));
+        std::copy(known_values.cbegin(), known_values.cend(), std::ostream_iterator<std::string>(Rcpp::Rcout, "\n"));
         return false;
     }
 

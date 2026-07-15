@@ -45,6 +45,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 #include <vector>
 
+#include <Rcpp.h> // MP: Added for R pkg to replace Rcpp::Rcout with Rcpp::Rcout
+
 bool CommandCheckRefs::setup(const std::vector<std::string>& arguments) {
     po::options_description opts_cmd{"COMMAND OPTIONS"};
     opts_cmd.add_options()
@@ -213,7 +215,7 @@ public:
             if (!get(osmium::item_type::node, node_ref.ref())) {
                 ++m_missing_nodes_in_ways;
                 if (m_show_ids) {
-                    std::cout << "n" << node_ref.ref() << " in w" << way.id() << "\n";
+                    Rcpp::Rcout << "n" << node_ref.ref() << " in w" << way.id() << "\n";
                 }
             }
         }
@@ -237,7 +239,7 @@ public:
                             ++m_missing_nodes_in_relations;
                             set(osmium::item_type::node, member.ref());
                             if (m_show_ids) {
-                                std::cout << "n" << member.ref() << " in r" << relation.id() << "\n";
+                                Rcpp::Rcout << "n" << member.ref() << " in r" << relation.id() << "\n";
                             }
                         }
                         break;
@@ -246,7 +248,7 @@ public:
                             ++m_missing_ways_in_relations;
                             set(osmium::item_type::way, member.ref());
                             if (m_show_ids) {
-                                std::cout << "w" << member.ref() << " in r" << relation.id() << "\n";
+                                Rcpp::Rcout << "w" << member.ref() << " in r" << relation.id() << "\n";
                             }
                         }
                         break;
@@ -264,7 +266,7 @@ public:
 
     void show_missing_relation_ids() {
         for (const auto& refs : m_relation_refs) {
-            std::cout << "r" << refs.first << " in r" << refs.second << "\n";
+            Rcpp::Rcout << "r" << refs.first << " in r" << refs.second << "\n";
         }
     }
 
@@ -301,17 +303,17 @@ bool CommandCheckRefs::run() {
         }
     }
 
-    std::cerr << "There are " << handler.node_count() << " nodes, "
+    Rcpp::Rcerr << "There are " << handler.node_count() << " nodes, "
                               << handler.way_count() << " ways, and "
                               << handler.relation_count() << " relations in this file.\n";
 
     if (m_check_relations) {
-        std::cerr << "Nodes     in ways      missing: " << handler.missing_nodes_in_ways()          << "\n";
-        std::cerr << "Nodes     in relations missing: " << handler.missing_nodes_in_relations()     << "\n";
-        std::cerr << "Ways      in relations missing: " << handler.missing_ways_in_relations()      << "\n";
-        std::cerr << "Relations in relations missing: " << handler.missing_relations_in_relations() << "\n";
+        Rcpp::Rcerr << "Nodes     in ways      missing: " << handler.missing_nodes_in_ways()          << "\n";
+        Rcpp::Rcerr << "Nodes     in relations missing: " << handler.missing_nodes_in_relations()     << "\n";
+        Rcpp::Rcerr << "Ways      in relations missing: " << handler.missing_ways_in_relations()      << "\n";
+        Rcpp::Rcerr << "Relations in relations missing: " << handler.missing_relations_in_relations() << "\n";
     } else {
-        std::cerr << "Nodes in ways missing: " << handler.missing_nodes_in_ways() << "\n";
+        Rcpp::Rcerr << "Nodes in ways missing: " << handler.missing_nodes_in_ways() << "\n";
     }
 
     m_vout << "Memory used for indexes: " << show_mbytes(handler.used_memory()) << " MBytes\n";

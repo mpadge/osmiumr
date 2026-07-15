@@ -45,6 +45,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 
+#include <Rcpp.h> // MP: Added for R pkg to replace std::cout with Rcpp::Rcout
+
 std::size_t CommandGetId::count_ids() const noexcept {
     return m_ids(osmium::item_type::node).size() +
            m_ids(osmium::item_type::way).size() +
@@ -112,7 +114,7 @@ bool CommandGetId::setup(const std::vector<std::string>& arguments) {
     if (vm.count("remove-tags")) {
         m_remove_tags = true;
         if (!m_add_referenced_objects) {
-            std::cerr << "Warning! Without -r/--add-referenced use of -t/--remove-tags isn't doing anything.\n";
+            Rcpp::Rcerr << "Warning! Without -r/--add-referenced use of -t/--remove-tags isn't doing anything.\n";
         }
     }
 
@@ -223,11 +225,11 @@ void print_missing_ids(const char* type, const osmium::index::IdSetDense<osmium:
     if (set.empty()) {
         return;
     }
-    std::cerr << "Missing " << type << " IDs:";
+    Rcpp::Rcerr << "Missing " << type << " IDs:";
     for (const auto id : set) {
-        std::cerr << ' ' << id;
+        Rcpp::Rcerr << ' ' << id;
     }
-    std::cerr << '\n';
+    Rcpp::Rcerr << '\n';
 }
 
 } // anonymous namespace

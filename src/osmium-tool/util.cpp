@@ -38,6 +38,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 #include <vector>
 
+#include <Rcpp.h> // MP: Added for R pkg to replace std::cout with Rcpp::Rcout
+
 /**
  * Get the suffix of the given file name. The suffix is everything after
  * the *first* dot (.). So multiple suffixes will all be returned.
@@ -63,11 +65,11 @@ const char* yes_no(bool choice) noexcept {
 }
 
 void warning(const char* text) {
-    std::cerr << "WARNING: " << text;
+    Rcpp::Rcerr << "WARNING: " << text;
 }
 
 void warning(const std::string& text) {
-    std::cerr << "WARNING: " << text;
+    Rcpp::Rcerr << "WARNING: " << text;
 }
 
 std::size_t file_size(const osmium::io::File& file) {

@@ -39,6 +39,8 @@ DEALINGS IN THE SOFTWARE.
 #include <sstream>
 #include <string>
 
+#include <Rcpp.h> // MP: Added for R pkg to replace std::cout with Rcpp::Rcout
+
 namespace osmium {
 
     /**
@@ -77,9 +79,9 @@ namespace osmium {
                 if (m_newline) {
                     const std::time_t elapsed = runtime();
 
-                    const char old_fill = std::cerr.fill();
-                    std::cerr << '[' << std::setw(2) << (elapsed / 60) << ':' << std::setw(2) << std::setfill('0') << (elapsed % 60) << "] ";
-                    std::cerr.fill(old_fill);
+                    const char old_fill = Rcpp::Rcerr.fill();
+                    Rcpp::Rcerr << '[' << std::setw(2) << (elapsed / 60) << ':' << std::setw(2) << std::setfill('0') << (elapsed % 60) << "] ";
+                    Rcpp::Rcerr.fill(old_fill);
 
                     m_newline = false;
                 }
@@ -110,7 +112,7 @@ namespace osmium {
             void print(const T& value) {
                 if (m_verbose) {
                     start_line();
-                    std::cerr << value;
+                    Rcpp::Rcerr << value;
 
                     // check if there was a newline a the end and remember that
                     std::ostringstream output_buffer;

@@ -54,6 +54,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 #include <vector>
 
+#include <Rcpp.h> // MP: Added for R pkg to replace Rcpp::Rcout with Rcpp::Rcout
+
 namespace {
 
 std::string get_attr_string(const nlohmann::json& object, const char* key) {
@@ -98,7 +100,7 @@ Ruleset parse_tags_ruleset(const nlohmann::json& object, const char* key) {
     }
 
     if (json->empty()) {
-        std::cerr << "Warning! An empty array for 'linear_tags' or 'area_tags' matches any tags.\n"
+        Rcpp::Rcerr << "Warning! An empty array for 'linear_tags' or 'area_tags' matches any tags.\n"
                   << "         Please use 'true' instead of the array.\n";
         ruleset.set_rule_type(tags_filter_rule_type::any);
         return ruleset;
@@ -294,7 +296,7 @@ bool CommandExport::setup(const std::vector<std::string>& arguments) {
     po::notify(vm);
 
     if (vm.count("print-default-config")) {
-        std::cout << R"({
+        Rcpp::Rcout << R"({
     "attributes": {
         "type":      false,
         "id":        false,
@@ -319,9 +321,9 @@ bool CommandExport::setup(const std::vector<std::string>& arguments) {
     if (vm.count("show-index-types")) {
         const auto& map_factory = osmium::index::MapFactory<osmium::unsigned_object_id_type, osmium::Location>::instance();
         for (const auto& map_type : map_factory.map_types()) {
-            std::cout << map_type << '\n';
+            Rcpp::Rcout << map_type << '\n';
         }
-        std::cout << "none\n";
+        Rcpp::Rcout << "none\n";
         return false;
     }
 
@@ -369,11 +371,11 @@ bool CommandExport::setup(const std::vector<std::string>& arguments) {
         try {
             parse_config_file();
         } catch (const nlohmann::json::parse_error& e) {
-            std::cerr << "Error while reading config file '" << m_config_file_name << "':\n";
+            Rcpp::Rcerr << "Error while reading config file '" << m_config_file_name << "':\n";
             throw config_error{std::string{"JSON error at offset "} +
                                std::to_string(e.byte) + ": " + e.what()};
         } catch (const config_error&) {
-            std::cerr << "Error while reading config file '" << m_config_file_name << "':\n";
+            Rcpp::Rcerr << "Error while reading config file '" << m_config_file_name << "':\n";
             throw;
         }
     }

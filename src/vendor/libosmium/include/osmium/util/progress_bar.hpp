@@ -37,6 +37,8 @@ DEALINGS IN THE SOFTWARE.
 #include <cstddef>
 #include <iostream>
 
+#include <Rcpp.h> // MP: Added for R pkg to replace std::cout with Rcpp::Rcout
+
 namespace osmium {
 
     /**
@@ -92,20 +94,20 @@ namespace osmium {
             m_prev_percent = percent;
 
             const auto num = static_cast<std::size_t>(static_cast<double>(percent) * (static_cast<double>(full_length) / 100.0));
-            std::cerr << '[';
+            Rcpp::Rcerr << '[';
             if (num >= full_length) {
-                std::cerr << bar();
+                Rcpp::Rcerr << bar();
             } else {
-                std::cerr << bar(num) << '>' << spc(full_length - num);
+                Rcpp::Rcerr << bar(num) << '>' << spc(full_length - num);
             }
-            std::cerr << "] ";
+            Rcpp::Rcerr << "] ";
             if (percent < 10) {
-                std::cerr << ' ';
+                Rcpp::Rcerr << ' ';
             }
             if (percent < 100) {
-                std::cerr << ' ';
+                Rcpp::Rcerr << ' ';
             }
-            std::cerr << percent << "% \r";
+            Rcpp::Rcerr << percent << "% \r";
         }
 
     public:
@@ -182,7 +184,7 @@ namespace osmium {
                 m_done_size = m_max_size;
                 m_current_size = 0;
                 display();
-                std::cerr << '\n';
+                Rcpp::Rcerr << '\n';
             }
         }
 
@@ -193,7 +195,7 @@ namespace osmium {
          */
         void remove() {
             if (m_enable) {
-                std::cerr << spc() << "         \r";
+                Rcpp::Rcerr << spc() << "         \r";
                 m_prev_percent = 100 + 1;
             }
         }

@@ -49,6 +49,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 #include <vector>
 
+#include <Rcpp.h> // MP: Added for R pkg to replace std::cout with Rcpp::Rcout
+
 bool CommandMerge::setup(const std::vector<std::string>& arguments) {
     po::options_description opts_cmd{"COMMAND OPTIONS"};
     opts_cmd.add_options()
@@ -165,8 +167,8 @@ namespace {
             }
 
             if (m_warning) {
-                std::cerr << "Warning: Multiple objects with same id in input file '" + m_name + "'!\n";
-                std::cerr << "If you are reading history files, this is to be expected. Use --with-history to disable warning.\n";
+                Rcpp::Rcerr << "Warning: Multiple objects with same id in input file '" + m_name + "'!\n";
+                Rcpp::Rcerr << "If you are reading history files, this is to be expected. Use --with-history to disable warning.\n";
                 m_warning = false;
             }
 

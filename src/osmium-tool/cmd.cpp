@@ -37,6 +37,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <iostream>
 #include <vector>
 
+#include <Rcpp.h> // MP: Added for R pkg to replace Rcpp::Rcout with Rcpp::Rcout
+
 po::options_description Command::add_common_options(const bool with_progress) {
     po::options_description options{"COMMON OPTIONS"};
 
@@ -55,7 +57,7 @@ po::options_description Command::add_common_options(const bool with_progress) {
 
 bool Command::setup_common(const boost::program_options::variables_map& vm, const po::options_description& desc) {
     if (vm.count("help")) {
-        std::cout << "Usage: " << synopsis() << "\n\n"
+        Rcpp::Rcout << "Usage: " << synopsis() << "\n\n"
                   << m_command_factory.get_description(name()) << "\n"
                   << desc
                   << "\nUse 'osmium help " << name() << "' to display the manual page.\n";

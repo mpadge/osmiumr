@@ -61,6 +61,8 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <system_error>
 #include <vector>
 
+#include <Rcpp.h> // MP: Added for R pkg to replace std::cout with Rcpp::Rcout
+
 #ifdef _WIN32
 #  ifndef WIN32_LEAN_AND_MEAN
 #   define WIN32_LEAN_AND_MEAN // Prevent winsock.h inclusion; avoid winsock2.h conflict
@@ -398,19 +400,19 @@ void CommandExtract::parse_config_file() {
             message += e.what();
             throw config_error{message};
         } catch (const poly_error&) {
-            std::cerr << "Error while reading poly file for extract " << extract_num << " (" << output << "):\n";
+            Rcpp::Rcerr << "Error while reading poly file for extract " << extract_num << " (" << output << "):\n";
             throw;
         } catch (const geojson_error&) {
-            std::cerr << "Error while reading GeoJSON file for extract " << extract_num << " (" << output << "):\n";
+            Rcpp::Rcerr << "Error while reading GeoJSON file for extract " << extract_num << " (" << output << "):\n";
             throw;
         } catch (const std::system_error&) {
-            std::cerr << "Error while reading OSM file for extract " << extract_num << " (" << output << "):\n";
+            Rcpp::Rcerr << "Error while reading OSM file for extract " << extract_num << " (" << output << "):\n";
             throw;
         } catch (const osmium::io_error&) {
-            std::cerr << "Error while reading OSM file for extract " << extract_num << " (" << output << "):\n";
+            Rcpp::Rcerr << "Error while reading OSM file for extract " << extract_num << " (" << output << "):\n";
             throw;
         } catch (const osmium::out_of_order_error&) {
-            std::cerr << "Error while reading OSM file for extract " << extract_num << " (" << output << "):\n";
+            Rcpp::Rcerr << "Error while reading OSM file for extract " << extract_num << " (" << output << "):\n";
             throw;
         }
 
@@ -575,10 +577,10 @@ void CommandExtract::show_extracts() {
 
     int n = 1;
     for (const auto& e : m_extracts) {
-        const char old_fill = std::cerr.fill();
+        const char old_fill = Rcpp::Rcerr.fill();
         m_vout << "[" << std::setw(2) << std::setfill('0') << n
                << "] Output:      " << e->output() << '\n';
-        std::cerr.fill(old_fill);
+        Rcpp::Rcerr.fill(old_fill);
         m_vout << "     Format:      " << e->output_format()    << '\n';
         m_vout << "     Description: " << e->description()      << '\n';
         if (!e->header_options().empty()) {
@@ -612,7 +614,7 @@ bool CommandExtract::run() {
                   "':\nJSON error at offset " + std::to_string(e.byte) +
                   " : " + e.what()};
         } catch (const config_error&) {
-            std::cerr << "Error while reading config file '" << m_config_file_name << "':\n";
+            Rcpp::Rcerr << "Error while reading config file '" << m_config_file_name << "':\n";
             throw;
         }
     }
