@@ -13,7 +13,46 @@ PKG_LIBS = @osmiumr_libs@
 
 CXX_STD = CXX17
 
-OSMIUM_TOOL_SOURCES = $(wildcard osmium-tool/*.cpp osmium-tool/extract/*.cpp osmium-tool/export/*.cpp)
+# Explicit source list rather than $(wildcard ...): CRAN's portability
+# checks flag GNU Make extensions like $(wildcard ...) in package
+# Makevars, so this is kept in sync by hand with src/osmium-tool/ (see
+# ../plan.md for which osmium-tool files are vendored and why).
+OSMIUM_TOOL_SOURCES = \
+    osmium-tool/cmd.cpp \
+    osmium-tool/cmd_factory.cpp \
+    osmium-tool/commands.cpp \
+    osmium-tool/command_cat.cpp \
+    osmium-tool/command_check_refs.cpp \
+    osmium-tool/command_export.cpp \
+    osmium-tool/command_extract.cpp \
+    osmium-tool/command_fileinfo.cpp \
+    osmium-tool/command_getid.cpp \
+    osmium-tool/command_help.cpp \
+    osmium-tool/command_merge.cpp \
+    osmium-tool/command_renumber.cpp \
+    osmium-tool/command_show.cpp \
+    osmium-tool/command_sort.cpp \
+    osmium-tool/command_tags_filter.cpp \
+    osmium-tool/id_file.cpp \
+    osmium-tool/io.cpp \
+    osmium-tool/option_clean.cpp \
+    osmium-tool/util.cpp \
+    osmium-tool/version.cpp \
+    osmium-tool/export/export_format_json.cpp \
+    osmium-tool/export/export_format_pg.cpp \
+    osmium-tool/export/export_format_text.cpp \
+    osmium-tool/export/export_handler.cpp \
+    osmium-tool/extract/extract.cpp \
+    osmium-tool/extract/extract_bbox.cpp \
+    osmium-tool/extract/extract_polygon.cpp \
+    osmium-tool/extract/geojson_file_parser.cpp \
+    osmium-tool/extract/geometry_util.cpp \
+    osmium-tool/extract/osm_file_parser.cpp \
+    osmium-tool/extract/poly_file_parser.cpp \
+    osmium-tool/extract/strategy_complete_ways.cpp \
+    osmium-tool/extract/strategy_complete_ways_with_history.cpp \
+    osmium-tool/extract/strategy_simple.cpp \
+    osmium-tool/extract/strategy_smart.cpp
 
 SOURCES = r_bridge.cpp RcppExports.cpp $(OSMIUM_TOOL_SOURCES)
 OBJECTS = $(SOURCES:.cpp=.o)
