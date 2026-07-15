@@ -41,6 +41,7 @@ data: ## Run 'data-raw/release-data-script' to (re-)generate release data
 
 clean: ## Clean all junk files, including all pkgdown docs
 	rm -rf *.html *.png README_cache docs/
+	./cleanup
 
 help: ## Show this help
 	@printf "Usage:\033[36m make [target]\033[0m\n"
