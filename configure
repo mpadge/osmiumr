@@ -46,15 +46,17 @@ if command -v brew >/dev/null 2>&1; then
     fi
 fi
 
-# zlib and expat are macOS system libraries: their .dylib still lives in
-# /usr/lib (already a candidate above), but since Catalina Apple no
-# longer ships their headers under /usr/include -- they only exist
-# inside the active Xcode/Command Line Tools SDK sysroot. Ask xcrun for
-# that SDK path and add its usr/include.
+# zlib and expat are macOS system libraries. Since Catalina, Apple no
+# longer ships their headers under /usr/include; since Big Sur, the
+# actual .dylib files aren't on disk at all (they only live in the dyld
+# shared cache) -- the only linkable artifact left is a .tbd stub inside
+# the active Xcode/Command Line Tools SDK sysroot. Ask xcrun for that SDK
+# path and add both its usr/include and usr/lib.
 if command -v xcrun >/dev/null 2>&1; then
     SDK_PATH=$(xcrun --show-sdk-path 2>/dev/null || true)
     if [ -n "$SDK_PATH" ]; then
         CANDIDATE_INCLUDE_DIRS="$CANDIDATE_INCLUDE_DIRS $SDK_PATH/usr/include"
+        CANDIDATE_LIB_DIRS="$CANDIDATE_LIB_DIRS $SDK_PATH/usr/lib"
     fi
 fi
 
@@ -80,7 +82,7 @@ find_lib() {
     # find_lib <libname without lib prefix/suffix>
     name="$1"
     for d in $CANDIDATE_LIB_DIRS; do
-        for ext in so a dylib; do
+        for ext in so a dylib tbd; do
             if [ -f "$d/lib${name}.${ext}" ]; then
                 echo "$d"
                 return 0
