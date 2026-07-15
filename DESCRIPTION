@@ -9,9 +9,6 @@ Authors@R: c(
 Description: Provides R functions wrapping the command implementations of
     'osmium-tool' (<https://osmcode.org/osmium-tool/>), a command line tool
     for working with OpenStreetMap data built on the 'libosmium' library.
-    Rather than shelling out to a separately installed 'osmium' binary,
-    the relevant 'osmium-tool' C++ command sources are compiled directly
-    into this package and called in-process through a small 'Rcpp' bridge.
 License: GPL (>= 3)
 Encoding: UTF-8
 SystemRequirements: C++17, libosmium (>= 2.23.1), protozero (>= 1.6.3),

@@ -6,7 +6,7 @@
 \alias{osmiumr-package}
 \title{osmiumr: R Bindings for the 'osmium-tool' OpenStreetMap Command Line Tool}
 \description{
-Provides R functions wrapping the command implementations of 'osmium-tool' (\url{https://osmcode.org/osmium-tool/}), a command line tool for working with OpenStreetMap data built on the 'libosmium' library. Rather than shelling out to a separately installed 'osmium' binary, the relevant 'osmium-tool' C++ command sources are compiled directly into this package and called in-process through a small 'Rcpp' bridge.
+Provides R functions wrapping the command implementations of 'osmium-tool' (\url{https://osmcode.org/osmium-tool/}), a command line tool for working with OpenStreetMap data built on the 'libosmium' library.
 }
 \author{
 \strong{Maintainer}: Mark Padgham \email{mark.padgham@email.com}
