@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="osmiumr-test-fixture">
+  <node id="1" lat="55.68" lon="12.57" version="1"/>
+  <node id="2" lat="55.681" lon="12.57" version="1"/>
+  <node id="3" lat="55.681" lon="12.571" version="1"/>
+  <node id="4" lat="55.682" lon="12.572" version="1"/>
+  <way id="10" version="1">
+    <nd ref="1"/>
+    <nd ref="2"/>
+    <nd ref="3"/>
+    <tag k="area" v="yes"/>
+  </way>
+  <way id="11" version="1">
+    <nd ref="4"/>
+    <tag k="area" v="yes"/>
+  </way>
+  <relation id="100" version="1">
+    <member type="way" ref="10" role="outer"/>
+    <member type="way" ref="11" role="outer"/>
+    <tag k="type" v="multipolygon"/>
+    <tag k="landuse" v="forest"/>
+  </relation>
+</osm>

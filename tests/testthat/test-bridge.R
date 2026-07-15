@@ -24,3 +24,17 @@ test_that("osmiumr_call surfaces stdout/stderr text on request", {
   expect_null(result$error)
   expect_true(nzchar(result$stdout))
 })
+
+test_that("the internal help command runs (command_help.cpp, no R wrapper)", {
+  # "help" isn't exposed as an osmium_*() wrapper -- it's osmium-tool's
+  # own top-level usage text, not something with parameters to build an
+  # R function signature around -- but it's still registered and
+  # reachable via the internal bridge, so cover it there.
+  result <- osmiumr_call("help", character())
+  expect_true(result$ok)
+  expect_true(nzchar(result$stdout))
+  expect_true(grepl("COMMANDS", result$stdout, fixed = TRUE))
+
+  topic_result <- osmiumr_call("help", "fileinfo")
+  expect_true(topic_result$ok)
+})

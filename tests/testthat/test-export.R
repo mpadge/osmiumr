@@ -33,3 +33,59 @@ test_that("keep_untagged includes features without tags", {
 
   expect_gte(n_with, n_without)
 })
+
+test_that("output_format = pg produces WKB geometry + tag columns", {
+  text <- osmium_export(fixture("denmark-mini.osm.pbf"), output_format = "pg")
+  lines <- strsplit(text, "\n", fixed = TRUE)[[1]]
+  lines <- lines[nzchar(lines)]
+  expect_gt(length(lines), 0)
+
+  # Each line is <tab-separated WKB hex><TAB><tag JSON>; the WKB hex
+  # column starts with "01" (little-endian byte-order marker), which is
+  # what osmium::geom::WKBFactory (osmium/geom/wkb.hpp) always emits.
+  first_cols <- strsplit(lines[1], "\t", fixed = TRUE)[[1]]
+  expect_true(startsWith(first_cols[1], "01"))
+})
+
+test_that("output_format = text produces WKT geometry + tag columns", {
+  text <- osmium_export(fixture("denmark-mini.osm.pbf"), output_format = "text")
+  lines <- strsplit(text, "\n", fixed = TRUE)[[1]]
+  lines <- lines[nzchar(lines)]
+  expect_gt(length(lines), 0)
+  expect_true(grepl("^POINT\\(|^LINESTRING\\(|^POLYGON\\(", lines[1]))
+})
+
+test_that("index_type accepts anonymous-mmap-backed index types", {
+  out <- tempfile(fileext = ".geojson")
+  on.exit(unlink(out))
+
+  osmium_export(fixture("denmark-mini.osm.pbf"), output = out, index_type = "sparse_mmap_array")
+  parsed <- jsonlite::fromJSON(out, simplifyVector = FALSE)
+  expect_equal(parsed$type, "FeatureCollection")
+})
+
+test_that("index_type accepts file-backed index types", {
+  out <- tempfile(fileext = ".geojson")
+  on.exit(unlink(out))
+
+  # Unlike sparse_mmap_array (anonymous mmap) above, the *_file_array
+  # index types back their storage with a real temp file (see
+  # osmium/index/detail/{create_map_with_fd,mmap_vector_file,tmpfile}.hpp).
+  osmium_export(fixture("denmark-mini.osm.pbf"), output = out, index_type = "sparse_file_array")
+  parsed <- jsonlite::fromJSON(out, simplifyVector = FALSE)
+  expect_equal(parsed$type, "FeatureCollection")
+})
+
+test_that("show_errors surfaces geometry problems instead of silently dropping them", {
+  # A hand-crafted multipolygon relation with a way that has only one
+  # node and a ring that never closes -- exercises
+  # osmium::area::ProblemReporter (osmium/area/problem_reporter.hpp),
+  # which nothing in the well-formed test fixture ever triggers.
+  result <- osmiumr:::osmiumr_call(
+    "export",
+    c(fixture("broken-multipolygon.osm"), "--output-format", "geojson",
+      "--show-errors", "-o", tempfile(fileext = ".geojson"))
+  )
+  expect_true(result$ok)
+  expect_true(grepl("Geometry error", result$stderr, fixed = TRUE))
+})

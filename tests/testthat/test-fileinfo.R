@@ -34,3 +34,18 @@ test_that("object_type restricts extended counts", {
 test_that("osmium_fileinfo errors on a nonexistent file", {
   expect_error(osmium_fileinfo("/no/such/file.osm.pbf"))
 })
+
+test_that("osmium_fileinfo errors cleanly on a truncated/corrupt PBF", {
+  # Reading through a truncated PBF (extended = TRUE forces a full read,
+  # not just the header) exercises the malformed-input error paths in
+  # protozero (protozero/exception.hpp) and libosmium's PBF decoder --
+  # nothing in the well-formed test fixture ever triggers these, and
+  # the point of the test is exactly that this surfaces as a normal R
+  # error rather than crashing the session.
+  corrupt <- tempfile(fileext = ".osm.pbf")
+  on.exit(unlink(corrupt))
+  raw <- readBin(fixture("denmark-mini.osm.pbf"), "raw", 2000)
+  writeBin(raw, corrupt)
+
+  expect_error(osmium_fileinfo(corrupt, extended = TRUE), "PBF")
+})

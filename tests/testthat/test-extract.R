@@ -51,3 +51,44 @@ test_that("set_bounds records a bounding box in the output header", {
   info <- osmium_fileinfo(out)
   expect_gt(NROW(info$header$boxes), 0)
 })
+
+test_that("polygon accepts a .poly boundary file", {
+  out <- tempfile(fileext = ".osm.pbf")
+  on.exit(unlink(out))
+
+  osmium_extract(fixture("denmark-mini.osm.pbf"), output = out, polygon = fixture("boundary.poly"))
+  info <- osmium_fileinfo(out, extended = TRUE)
+  expect_gt(info$data$count$nodes, 0)
+})
+
+test_that("polygon accepts a GeoJSON boundary file", {
+  out <- tempfile(fileext = ".osm.pbf")
+  on.exit(unlink(out))
+
+  osmium_extract(fixture("denmark-mini.osm.pbf"), output = out, polygon = fixture("boundary.geojson"))
+  info <- osmium_fileinfo(out, extended = TRUE)
+  expect_gt(info$data$count$nodes, 0)
+})
+
+test_that("with_history runs without error", {
+  out <- tempfile(fileext = ".osm.pbf")
+  on.exit(unlink(out))
+
+  full <- osmium_fileinfo(fixture("denmark-mini.osm.pbf"), extended = TRUE)
+  box <- full$data$bbox
+
+  osmium_extract(fixture("denmark-mini.osm.pbf"), output = out, bbox = box, with_history = TRUE)
+  expect_true(file.exists(out))
+})
+
+test_that("strategy = smart produces a valid extract", {
+  out <- tempfile(fileext = ".osm.pbf")
+  on.exit(unlink(out))
+
+  full <- osmium_fileinfo(fixture("denmark-mini.osm.pbf"), extended = TRUE)
+  box <- full$data$bbox
+
+  osmium_extract(fixture("denmark-mini.osm.pbf"), output = out, bbox = box, strategy = "smart")
+  info <- osmium_fileinfo(out, extended = TRUE)
+  expect_gt(info$data$count$nodes, 0)
+})
