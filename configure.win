@@ -1,0 +1,7 @@
+#!/bin/sh
+# osmiumr does not yet have a Windows build recipe (rwinlib-style prebuilt
+# libosmium/protozero/boost/etc. archives would be needed, mirroring how
+# packages like sf/gdalcubes fetch static Windows dependencies). See
+# plan.md for the dependency list. Contributions welcome.
+echo "*** osmiumr: Windows builds are not yet supported (see configure.win / plan.md)." >&2
+exit 1

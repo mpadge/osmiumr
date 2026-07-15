@@ -1,0 +1,138 @@
+#!/bin/sh
+# osmiumr configure script.
+#
+# Locates the system libraries osmium-tool's own CMakeLists.txt requires
+# (see osmium-tool/README.md / osmium-tool/CMakeLists.txt for the upstream
+# equivalent of these checks) and writes src/Makevars from
+# src/Makevars.in. There is no bundled copy of libosmium/protozero/boost/
+# etc. in this package; they must be installed on the system, same as for
+# building osmium-tool itself.
+
+set -e
+
+CXX=$(${R_HOME}/bin/R CMD config CXX17 2>/dev/null || true)
+if [ -z "$CXX" ]; then
+    CXX=$(${R_HOME}/bin/R CMD config CXX 2>/dev/null || true)
+fi
+CXXFLAGS=$(${R_HOME}/bin/R CMD config CXX17FLAGS 2>/dev/null || ${R_HOME}/bin/R CMD config CXXFLAGS 2>/dev/null || true)
+
+CANDIDATE_INCLUDE_DIRS="/usr/include /usr/local/include /opt/homebrew/include /opt/local/include"
+CANDIDATE_LIB_DIRS="/usr/lib /usr/lib64 /usr/local/lib /opt/homebrew/lib /opt/local/lib /usr/lib/x86_64-linux-gnu"
+
+fail() {
+    echo "*** configure: $1" >&2
+    exit 1
+}
+
+find_header() {
+    # find_header <relative/header/path> [extra dirs...]
+    hdr="$1"
+    shift
+    for d in "$@" $CANDIDATE_INCLUDE_DIRS; do
+        if [ -f "$d/$hdr" ]; then
+            echo "$d"
+            return 0
+        fi
+    done
+    return 1
+}
+
+find_lib() {
+    # find_lib <libname without lib prefix/suffix>
+    name="$1"
+    for d in $CANDIDATE_LIB_DIRS; do
+        for ext in so a dylib; do
+            if [ -f "$d/lib${name}.${ext}" ]; then
+                echo "$d"
+                return 0
+            fi
+        done
+        for f in "$d"/lib${name}.so.*; do
+            if [ -f "$f" ]; then
+                echo "$d"
+                return 0
+            fi
+        done
+    done
+    return 1
+}
+
+echo "--- osmiumr configure ---"
+
+# --- libosmium (header-only) -------------------------------------------
+OSMIUM_INC=$(find_header "osmium/version.hpp" "${OSMIUM_INCLUDE_DIR}") \
+    || fail "libosmium headers not found. Install libosmium (>= 2.23.1), e.g. 'apt install libosmium2-dev', or set OSMIUM_INCLUDE_DIR."
+OSMIUM_MAJOR=$(sed -n 's/^#define LIBOSMIUM_VERSION_MAJOR \([0-9]*\).*/\1/p' "$OSMIUM_INC/osmium/version.hpp")
+OSMIUM_MINOR=$(sed -n 's/^#define LIBOSMIUM_VERSION_MINOR \([0-9]*\).*/\1/p' "$OSMIUM_INC/osmium/version.hpp")
+OSMIUM_PATCH=$(sed -n 's/^#define LIBOSMIUM_VERSION_PATCH \([0-9]*\).*/\1/p' "$OSMIUM_INC/osmium/version.hpp")
+echo "Found libosmium ${OSMIUM_MAJOR}.${OSMIUM_MINOR}.${OSMIUM_PATCH} in $OSMIUM_INC"
+if [ "$OSMIUM_MAJOR" -lt 2 ] || { [ "$OSMIUM_MAJOR" -eq 2 ] && [ "$OSMIUM_MINOR" -lt 23 ]; }; then
+    fail "libosmium >= 2.23.1 required, found ${OSMIUM_MAJOR}.${OSMIUM_MINOR}.${OSMIUM_PATCH}"
+fi
+
+# --- protozero (header-only) --------------------------------------------
+PROTOZERO_INC=$(find_header "protozero/version.hpp" "${PROTOZERO_INCLUDE_DIR}") \
+    || fail "protozero headers not found. Install protozero (>= 1.6.3), e.g. 'apt install libprotozero-dev', or set PROTOZERO_INCLUDE_DIR."
+PROTOZERO_MAJOR=$(sed -n 's/^#define PROTOZERO_VERSION_MAJOR \([0-9]*\).*/\1/p' "$PROTOZERO_INC/protozero/version.hpp")
+PROTOZERO_MINOR=$(sed -n 's/^#define PROTOZERO_VERSION_MINOR \([0-9]*\).*/\1/p' "$PROTOZERO_INC/protozero/version.hpp")
+PROTOZERO_PATCH=$(sed -n 's/^#define PROTOZERO_VERSION_PATCH \([0-9]*\).*/\1/p' "$PROTOZERO_INC/protozero/version.hpp")
+echo "Found protozero ${PROTOZERO_MAJOR}.${PROTOZERO_MINOR}.${PROTOZERO_PATCH} in $PROTOZERO_INC"
+if [ "$PROTOZERO_MAJOR" -lt 1 ] || { [ "$PROTOZERO_MAJOR" -eq 1 ] && [ "$PROTOZERO_MINOR" -lt 6 ]; }; then
+    fail "protozero >= 1.6.3 required, found ${PROTOZERO_MAJOR}.${PROTOZERO_MINOR}.${PROTOZERO_PATCH}"
+fi
+
+# --- nlohmann-json (header-only) ----------------------------------------
+JSON_INC=$(find_header "nlohmann/json.hpp" "${NLOHMANN_INCLUDE_DIR}") \
+    || fail "nlohmann-json headers not found. Install nlohmann-json (>= 3.0), e.g. 'apt install nlohmann-json3-dev', or set NLOHMANN_INCLUDE_DIR."
+echo "Found nlohmann-json in $JSON_INC"
+
+# --- boost::program_options (headers + compiled lib) ---------------------
+BOOST_INC=$(find_header "boost/program_options.hpp" "${BOOST_INCLUDE_DIR}") \
+    || fail "boost/program_options.hpp not found. Install libboost-program-options-dev (>= 1.55), or set BOOST_INCLUDE_DIR."
+BOOST_VERSION_RAW=$(sed -n 's/^#define BOOST_VERSION \([0-9]*\).*/\1/p' "$BOOST_INC/boost/version.hpp")
+BOOST_VERSION_MAJOR=$((BOOST_VERSION_RAW / 100000))
+BOOST_VERSION_MINOR=$(((BOOST_VERSION_RAW / 100) % 1000))
+echo "Found boost ${BOOST_VERSION_MAJOR}.${BOOST_VERSION_MINOR} headers in $BOOST_INC"
+if [ "$BOOST_VERSION_MAJOR" -lt 1 ] || { [ "$BOOST_VERSION_MAJOR" -eq 1 ] && [ "$BOOST_VERSION_MINOR" -lt 55 ]; }; then
+    fail "boost >= 1.55 required, found ${BOOST_VERSION_MAJOR}.${BOOST_VERSION_MINOR}"
+fi
+BOOST_LIB_DIR=$(find_lib "boost_program_options" || find_lib "boost_program_options-mt") \
+    || fail "libboost_program_options not found. Install libboost-program-options-dev, or set BOOST_LIB_DIR."
+echo "Found libboost_program_options in $BOOST_LIB_DIR"
+
+# --- bz2, zlib, expat ------------------------------------------------------
+BZ2_INC=$(find_header "bzlib.h") || fail "bzlib.h not found. Install libbz2-dev."
+BZ2_LIB_DIR=$(find_lib "bz2") || fail "libbz2 not found. Install libbz2-dev."
+
+ZLIB_INC=$(find_header "zlib.h") || fail "zlib.h not found. Install zlib1g-dev."
+ZLIB_LIB_DIR=$(find_lib "z") || fail "libz not found. Install zlib1g-dev."
+
+EXPAT_INC=$(find_header "expat.h") || fail "expat.h not found. Install libexpat1-dev."
+EXPAT_LIB_DIR=$(find_lib "expat") || fail "libexpat not found. Install libexpat1-dev."
+
+# --- lz4 (optional) --------------------------------------------------------
+LZ4_DEFS=""
+LZ4_LIBS=""
+LZ4_INC=$(find_header "lz4.h" "${LZ4_INCLUDE_DIR}" || true)
+LZ4_LIB_DIR=$(find_lib "lz4" || true)
+if [ -n "$LZ4_INC" ] && [ -n "$LZ4_LIB_DIR" ]; then
+    echo "Found lz4 in $LZ4_INC / $LZ4_LIB_DIR - building with LZ4 PBF compression support"
+    LZ4_DEFS="-DOSMIUM_WITH_LZ4"
+    LZ4_CPPFLAGS="-I$LZ4_INC"
+    LZ4_LIBS="-L$LZ4_LIB_DIR -llz4"
+else
+    echo "lz4 not found - building without LZ4 PBF compression support"
+    LZ4_CPPFLAGS=""
+fi
+
+PKG_CPPFLAGS="-I$OSMIUM_INC -I$PROTOZERO_INC -I$JSON_INC -I$BOOST_INC -I$BZ2_INC -I$ZLIB_INC -I$EXPAT_INC $LZ4_CPPFLAGS $LZ4_DEFS -DBOOST_ALL_NO_LIB"
+PKG_LIBS="-L$BOOST_LIB_DIR -lboost_program_options -L$BZ2_LIB_DIR -lbz2 -L$ZLIB_LIB_DIR -lz -L$EXPAT_LIB_DIR -lexpat $LZ4_LIBS -lpthread"
+
+echo "PKG_CPPFLAGS=$PKG_CPPFLAGS"
+echo "PKG_LIBS=$PKG_LIBS"
+
+sed -e "s|@osmiumr_cppflags@|$PKG_CPPFLAGS|" \
+    -e "s|@osmiumr_libs@|$PKG_LIBS|" \
+    src/Makevars.in > src/Makevars
+
+echo "--- osmiumr configure: done ---"

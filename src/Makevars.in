@@ -1,0 +1,19 @@
+\
+# Generated into src/Makevars by ../configure. See ../configure for how
+# @osmiumr_cppflags@ / @osmiumr_libs@ are determined.
+#
+# -Icompat comes first so vendored osmium-tool files' own
+# `#include <boost/program_options.hpp>` resolves to osmiumr's
+# header-only shim (compat/boost/program_options.hpp) instead of any
+# real Boost that might also be present on the include path -- see that
+# file for why a real boost::program_options is not used.
+
+PKG_CPPFLAGS = -Icompat @osmiumr_cppflags@ -I.
+PKG_LIBS = @osmiumr_libs@
+
+CXX_STD = CXX17
+
+OSMIUM_TOOL_SOURCES = $(wildcard osmium-tool/*.cpp osmium-tool/extract/*.cpp osmium-tool/export/*.cpp)
+
+SOURCES = r_bridge.cpp RcppExports.cpp $(OSMIUM_TOOL_SOURCES)
+OBJECTS = $(SOURCES:.cpp=.o)
