@@ -24,10 +24,8 @@
 #'   `add_referenced = TRUE`).
 #' @param verbose_ids If TRUE, print all requested and missing IDs
 #'   (implies `verbose`).
-#' @param object_type,input_format,overwrite,fsync,generator,output_header,verbose
-#'   See [osmium_cat()]. `object_type` is not a getid option itself;
-#'   omit it (present here only for interface consistency and currently
-#'   unused -- kept NULL).
+#' @param input_format,overwrite,fsync,generator,output_header,verbose
+#'   See [osmium_cat()].
 #' @return The `output` path, invisibly.
 #' @export
 osmium_getid <- function(input, output, ids = NULL, id_file = NULL,

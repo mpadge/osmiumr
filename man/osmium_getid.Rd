@@ -54,9 +54,7 @@ because they're referenced (has no effect unless
 \item{verbose_ids}{If TRUE, print all requested and missing IDs
 (implies `verbose`).}
 
-\item{object_type, input_format, overwrite, fsync, generator, output_header, verbose}{See [osmium_cat()]. `object_type` is not a getid option itself;
-omit it (present here only for interface consistency and currently
-unused -- kept NULL).}
+\item{input_format, overwrite, fsync, generator, output_header, verbose}{See [osmium_cat()].}
 }
 \value{
 The `output` path, invisibly.
