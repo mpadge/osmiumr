@@ -181,9 +181,6 @@ namespace osmium {
                 }
 
                 void check_inner_outer_roles() {
-                    if (debug()) {
-                        std::cerr << "    Checking inner/outer roles\n";
-                    }
 
                     std::unordered_map<const osmium::Way*, const ProtoRing*> way_rings;
                     std::unordered_set<const osmium::Way*> ways_in_multiple_rings;
@@ -194,10 +191,6 @@ namespace osmium {
 
                             if (!segment->role_empty() && (ring.is_outer() ? !segment->role_outer() : !segment->role_inner())) {
                                 ++m_stats.wrong_role;
-                                if (debug()) {
-                                    std::cerr << "      Segment " << *segment << " from way " << segment->way()->id() << " has role '" << segment->role_name()
-                                              << "', but should have role '" << (ring.is_outer() ? "outer" : "inner") << "'\n";
-                                }
                                 if (m_config.problem_reporter) {
                                     if (ring.is_outer()) {
                                         m_config.problem_reporter->report_role_should_be_outer(segment->way()->id(), segment->first().location(), segment->second().location());
@@ -219,9 +212,6 @@ namespace osmium {
 
                     for (const osmium::Way* way : ways_in_multiple_rings) { // NOLINT(bugprone-nondeterministic-pointer-iteration-order)
                         ++m_stats.ways_in_multiple_rings;
-                        if (debug()) {
-                            std::cerr << "      Way " << way->id() << " is in multiple rings\n";
-                        }
                         if (m_config.problem_reporter) {
                             m_config.problem_reporter->report_way_in_multiple_rings(*way);
                         }
@@ -291,9 +281,6 @@ namespace osmium {
                 }
 
                 ProtoRing* find_enclosing_ring(NodeRefSegment const* segment) {
-                    if (debug()) {
-                        std::cerr << "    Looking for ring enclosing " << *segment << "\n";
-                    }
 
                     const auto location = segment->first().location();
                     const auto end_location = segment->second().location();
@@ -313,9 +300,6 @@ namespace osmium {
                             --segment;
                             continue;
                         }
-                        if (debug()) {
-                            std::cerr << "      Checking against " << *segment << "\n";
-                        }
                         const osmium::Location& a = segment->first().location();
                         const osmium::Location& b = segment->second().location();
 
@@ -327,25 +311,13 @@ namespace osmium {
                             const int64_t by = b.y();
                             const int64_t ly = end_location.y();
                             const auto z = ((bx - ax) * (ly - ay)) - ((by - ay) * (lx - ax));
-                            if (debug()) {
-                                std::cerr << "      Segment z=" << z << '\n';
-                            }
                             if (z > 0) {
                                 nesting += segment->is_reverse() ? -1 : 1;
-                                if (debug()) {
-                                    std::cerr << "        Segment is below (nesting=" << nesting << ")\n";
-                                }
                                 if (segment->ring()->is_outer()) {
-                                    if (debug()) {
-                                        std::cerr << "        Segment belongs to outer ring (y=" << a.y() << " ring=" << *segment->ring() << ")\n";
-                                    }
                                     outer_rings.emplace_back(a.y(), segment->ring());
                                 }
                             }
                         } else if (a.x() <= location.x() && location.x() < b.x()) {
-                            if (debug()) {
-                                std::cerr << "        Is in x range\n";
-                            }
 
                             const int64_t ax = a.x();
                             const int64_t bx = b.x();
@@ -357,15 +329,9 @@ namespace osmium {
 
                             if (z >= 0) {
                                 nesting += segment->is_reverse() ? -1 : 1;
-                                if (debug()) {
-                                    std::cerr << "        Segment is below (nesting=" << nesting << ")\n";
-                                }
                                 if (segment->ring()->is_outer()) {
                                     const double y = static_cast<double>(ay) +
                                                      (static_cast<double>((by - ay) * (lx - ax)) / static_cast<double>(bx - ax));
-                                    if (debug()) {
-                                        std::cerr << "        Segment belongs to outer ring (y=" << y << " ring=" << *segment->ring() << ")\n";
-                                    }
                                     outer_rings.emplace_back(y, segment->ring());
                                 }
                             }
@@ -374,31 +340,14 @@ namespace osmium {
                     }
 
                     if (nesting % 2 == 0) {
-                        if (debug()) {
-                            std::cerr << "    Decided that this is an outer ring\n";
-                        }
                         return nullptr;
                     }
 
-                    if (debug()) {
-                        std::cerr << "    Decided that this is an inner ring\n";
-                    }
                     assert(!outer_rings.empty());
 
                     std::stable_sort(outer_rings.rbegin(), outer_rings.rend());
-                    if (debug()) {
-                        for (const auto& o : outer_rings) {
-                            std::cerr << "        y=" << o.y() << " " << o.ring() << "\n";
-                        }
-                    }
 
                     remove_duplicates(outer_rings);
-                    if (debug()) {
-                        std::cerr << "      after remove duplicates:\n";
-                        for (const auto& o : outer_rings) {
-                            std::cerr << "        y=" << o.y() << " " << o.ring() << "\n";
-                        }
-                    }
 
                     assert(!outer_rings.empty());
                     return outer_rings.front().ring_ptr();
@@ -412,9 +361,6 @@ namespace osmium {
                     NodeRefSegment* segment = &m_segment_list[node.item];
                     assert(!segment->is_done());
 
-                    if (debug()) {
-                        std::cerr << "  Starting new ring at location " << node.location(m_segment_list) << " with segment " << *segment << "\n";
-                    }
 
                     if (node.reverse) {
                         segment->reverse();
@@ -430,13 +376,8 @@ namespace osmium {
                     m_rings.emplace_back(segment);
                     ProtoRing* ring = &m_rings.back();
                     if (outer_ring) {
-                        if (debug()) {
-                            std::cerr << "    This is an inner ring. Outer ring is " << *outer_ring << "\n";
-                        }
                         outer_ring->add_inner_ring(ring);
                         ring->set_outer_ring(outer_ring);
-                    } else if (debug()) {
-                        std::cerr << "    This is an outer ring\n";
                     }
 
                     const osmium::Location& first_location = node.location(m_segment_list);
@@ -451,17 +392,11 @@ namespace osmium {
                             next_segment->reverse();
                         }
                         ring->add_segment_back(next_segment);
-                        if (debug()) {
-                            std::cerr << "    Next segment is " << *next_segment << "\n";
-                        }
                         last_location = next_segment->stop().location();
                     }
 
                     ring->fix_direction();
 
-                    if (debug()) {
-                        std::cerr << "    Completed ring: " << *ring << "\n";
-                    }
 
                     return nodes;
                 }
@@ -470,9 +405,6 @@ namespace osmium {
                     NodeRefSegment* segment = &m_segment_list[node.item];
                     assert(!segment->is_done());
 
-                    if (debug()) {
-                        std::cerr << "  Starting new ring at location " << node.location(m_segment_list) << " with segment " << *segment << "\n";
-                    }
 
                     if (node.reverse) {
                         segment->reverse();
@@ -492,19 +424,9 @@ namespace osmium {
                             next_segment->reverse();
                         }
                         ring->add_segment_back(next_segment);
-                        if (debug()) {
-                            std::cerr << "    Next segment is " << *next_segment << "\n";
-                        }
                         last_location = next_segment->stop().location();
                     }
 
-                    if (debug()) {
-                        if (first_location == last_location) {
-                            std::cerr << "    Completed ring: " << *ring << "\n";
-                        } else {
-                            std::cerr << "    Completed partial ring: " << *ring << "\n";
-                        }
-                    }
 
                     return nodes;
                 }
@@ -538,9 +460,6 @@ namespace osmium {
                 }
 
                 void find_inner_outer_complex() {
-                    if (debug()) {
-                        std::cerr << "  Finding inner/outer rings\n";
-                    }
                     std::vector<ProtoRing*> rings;
                     rings.reserve(m_rings.size());
                     for (auto& ring : m_rings) {
@@ -559,17 +478,8 @@ namespace osmium {
 
                     rings.front()->fix_direction();
                     rings.front()->mark_direction_done();
-                    if (debug()) {
-                        std::cerr << "    First ring is outer: " << *rings.front() << "\n";
-                    }
                     for (auto it = std::next(rings.begin()); it != rings.end(); ++it) {
-                        if (debug()) {
-                            std::cerr << "    Checking (at min segment " << *((*it)->min_segment()) << ") ring " << **it << "\n";
-                        }
                         find_inner_outer_complex(*it);
-                        if (debug()) {
-                            std::cerr << "    Ring is " << ((*it)->is_outer() ? "OUTER: " : "INNER: ") << **it << "\n";
-                        }
                     }
                 }
 
@@ -584,9 +494,6 @@ namespace osmium {
                         const osmium::NodeRef& nr = it->node_ref(m_segment_list);
                         const osmium::Location& loc = nr.location();
                         if (std::next(it) == m_locations.cend() || loc != std::next(it)->location(m_segment_list)) {
-                            if (debug()) {
-                                std::cerr << "  Found open ring at " << nr << "\n";
-                            }
                             if (m_config.problem_reporter) {
                                 const auto& segment = m_segment_list[it->item];
                                 m_config.problem_reporter->report_ring_not_closed(nr, segment.way());
@@ -624,9 +531,6 @@ namespace osmium {
                     xrings.reserve(open_ring_its.size() * 2);
 
                     for (auto it = open_ring_its.begin(); it != open_ring_its.end(); ++it) {
-                        if (debug()) {
-                            std::cerr << "      " << **it << '\n';
-                        }
                         xrings.emplace_back((*it)->get_node_ref_start().location(), it, true);
                         xrings.emplace_back((*it)->get_node_ref_stop().location(), it, false);
                     }
@@ -667,9 +571,6 @@ namespace osmium {
                         return false;
                     }
 
-                    if (debug()) {
-                        std::cerr << "    Trying to merge " << open_ring_its.size() << " open rings (try_to_merge)\n";
-                    }
 
                     const auto xrings = create_location_to_ring_map(open_ring_its);
 
@@ -681,9 +582,6 @@ namespace osmium {
                         }
                         auto after = std::next(it, 2);
                         if (after == xrings.cend() || after->location != it->location) {
-                            if (debug()) {
-                                std::cerr << "      Merging two rings\n";
-                            }
                             merge_two_rings(open_ring_its, *it, *std::next(it));
                             return true;
                         }
@@ -729,12 +627,6 @@ namespace osmium {
                         throw exceeded_max_depth{};
                     }
 
-                    if (debug()) {
-                        std::cerr << "      find_candidates sum=" << cand.sum << " start=" << cand.start_location << " stop=" << cand.stop_location << "\n";
-                        for (const auto& ring : cand.rings) {
-                            std::cerr << "        " << ring.first.ring() << (ring.second ? " reverse" : "") << "\n";
-                        }
-                    }
 
                     const auto connections = make_range(std::equal_range(xrings.cbegin(),
                                                                          xrings.cend(),
@@ -748,9 +640,6 @@ namespace osmium {
                         const ProtoRing& ring = m.ring();
 
                         if (&ring != ring_leading_here) {
-                            if (debug()) {
-                                std::cerr << "        next possible connection: " << ring << (m.start ? "" : " reverse") << "\n";
-                            }
 
                             candidate c = cand;
                             if (m.start) {
@@ -763,9 +652,6 @@ namespace osmium {
                                 c.sum -= ring.sum();
                             }
                             if (c.closed()) {
-                                if (debug()) {
-                                    std::cerr << "          found candidate\n";
-                                }
 
                                 if (candidates.empty()) {
                                     candidates.push_back(c);
@@ -785,18 +671,10 @@ namespace osmium {
                                     }
                                 }
                             } else if (std::find(loc_done.cbegin(), loc_done.cend(), c.stop_location) == loc_done.cend()) {
-                                if (debug()) {
-                                    std::cerr << "          recurse... (depth=" << depth << " candidates.size=" << candidates.size() << " loc_done.size=" << loc_done.size() << ")\n";
-                                }
                                 loc_done.push_back(c.stop_location);
                                 find_candidates(candidates, loc_done, xrings, c, depth + 1);
                                 assert(!loc_done.empty() && loc_done.back() == c.stop_location);
                                 loc_done.pop_back();
-                                if (debug()) {
-                                    std::cerr << "          ...back\n";
-                                }
-                            } else if (debug()) {
-                                std::cerr << "          loop found\n";
                             }
                         }
                     }
@@ -813,9 +691,6 @@ namespace osmium {
                 bool join_connected_rings(open_ring_its_type& open_ring_its) {
                     assert(!open_ring_its.empty());
 
-                    if (debug()) {
-                        std::cerr << "    Trying to merge " << open_ring_its.size() << " open rings (join_connected_rings)\n";
-                    }
 
                     std::vector<location_to_ring_map> xrings = create_location_to_ring_map(open_ring_its);
 
@@ -826,9 +701,6 @@ namespace osmium {
                     find_inner_outer_complex();
                     const ProtoRing* outer_ring = find_enclosing_ring(ring_min->ring().min_segment());
                     const bool ring_min_is_outer = !outer_ring;
-                    if (debug()) {
-                        std::cerr << "  Open ring is " << (ring_min_is_outer ? "outer" : "inner") << " ring\n";
-                    }
                     for (auto& ring : m_rings) {
                         ring.reset();
                     }
@@ -845,16 +717,10 @@ namespace osmium {
                     try {
                         find_candidates(candidates, loc_done, xrings, cand);
                     } catch (const exceeded_max_depth&) {
-                        if (m_config.debug_level > 0) {
-                            std::cerr << "    Exceeded max depth (" << static_cast<unsigned>(max_depth) << ")\n";
-                        }
                         return false;
                     }
 
                     if (candidates.empty()) {
-                        if (debug()) {
-                            std::cerr << "    Found no candidates\n";
-                        }
                         if (!open_ring_its.empty()) {
                             ++m_stats.open_rings;
                             if (m_config.problem_reporter) {
@@ -867,25 +733,10 @@ namespace osmium {
                         return false;
                     }
 
-                    if (debug()) {
-                        std::cerr << "    Found candidates:\n";
-                        for (const auto& c : candidates) {
-                            std::cerr << "      sum=" << c.sum << "\n";
-                            for (const auto& ring : c.rings) {
-                                std::cerr << "        " << ring.first.ring() << (ring.second ? " reverse" : "") << "\n";
-                            }
-                        }
-                    }
 
                     // Find the candidate with the smallest/largest area
                     const auto chosen_cand = ring_min_is_outer ? candidates.front() : candidates.back();
 
-                    if (debug()) {
-                        std::cerr << "    Decided on: sum=" << chosen_cand.sum << "\n";
-                        for (const auto& ring : chosen_cand.rings) {
-                            std::cerr << "        " << ring.first.ring() << (ring.second ? " reverse" : "") << "\n";
-                        }
-                    }
 
                     // Join all (open) rings in the candidate to get one closed ring.
                     assert(chosen_cand.rings.size() > 1);
@@ -895,9 +746,6 @@ namespace osmium {
                         merge_two_rings(open_ring_its, first_ring, it->first);
                     }
 
-                    if (debug()) {
-                        std::cerr << "    Merged to " << remaining_ring << '\n';
-                    }
 
                     return true;
                 }
@@ -950,26 +798,17 @@ namespace osmium {
                         }
 
                         while (!open_ring_its.empty()) {
-                            if (debug()) {
-                                std::cerr << "  There are " << open_ring_its.size() << " open rings\n";
-                            }
                             while (try_to_merge(open_ring_its)) {
                                 // intentionally left blank
                             }
 
                             if (!open_ring_its.empty()) {
-                                if (debug()) {
-                                    std::cerr << "  After joining obvious cases there are still " << open_ring_its.size() << " open rings\n";
-                                }
                                 if (!join_connected_rings(open_ring_its)) {
                                     return false;
                                 }
                             }
                         }
 
-                        if (debug()) {
-                            std::cerr << "  Joined all open rings\n";
-                        }
                     }
 
                     // Now all rings are complete.
@@ -978,18 +817,6 @@ namespace osmium {
 
                     return true;
                 }
-
-#ifdef OSMIUM_WITH_TIMER
-                static bool print_header() {
-                    std::cout << "nodes outer_rings inner_rings sort dupl intersection locations split simple_case complex_case roles_check\n";
-                    return true;
-                }
-
-                static bool init_header() {
-                    static bool printed_print_header = print_header();
-                    return printed_print_header;
-                }
-#endif
 
             protected:
 
@@ -1042,18 +869,9 @@ namespace osmium {
                     // If there are no segments left at this point, this isn't
                     // a valid area.
                     if (m_segment_list.empty()) {
-                        if (debug()) {
-                            std::cerr << "  No segments left\n";
-                        }
                         return false;
                     }
 
-                    if (m_config.debug_level >= 3) {
-                        std::cerr << "Sorted de-duplicated segment list:\n";
-                        for (const auto& s : m_segment_list) {
-                            std::cerr << "  " << s << "\n";
-                        }
-                    }
 
                     // Now we look for segments crossing each other. If there are
                     // any, the multipolygon is invalid.
@@ -1088,9 +906,6 @@ namespace osmium {
                     // Now report all split locations to the problem reporter.
                     m_stats.touching_rings += m_split_locations.size();
                     if (!m_split_locations.empty()) {
-                        if (debug()) {
-                            std::cerr << "  Found split locations:\n";
-                        }
                         for (const auto& location : m_split_locations) {
                             if (m_config.problem_reporter) {
                                 auto it = std::lower_bound(m_locations.cbegin(), m_locations.cend(), slocation{}, [this, &location](const slocation& lhs, const slocation& rhs) {
@@ -1099,9 +914,6 @@ namespace osmium {
                                 assert(it != m_locations.cend());
                                 const osmium::object_id_type id = it->node_ref(m_segment_list).ref();
                                 m_config.problem_reporter->report_touching_ring(id, location);
-                            }
-                            if (debug()) {
-                                std::cerr << "    " << location << "\n";
                             }
                         }
                     }
@@ -1112,29 +924,14 @@ namespace osmium {
                     // there are, we use the slower "complex algorithm".
                     osmium::Timer timer;
                     if (m_split_locations.empty()) {
-                        if (debug()) {
-                            std::cerr << "  No split locations -> using simple algorithm\n";
-                        }
                         ++m_stats.area_simple_case;
 
                         timer.start();
                         create_rings_simple_case();
                         timer.stop();
                     } else if (m_split_locations.size() > max_split_locations) {
-                        if (m_config.debug_level > 0) {
-                            std::cerr << "  Ignoring polygon with "
-                                      << m_split_locations.size()
-                                      << " split locations (>"
-                                      << max_split_locations
-                                      << ")\n";
-                        }
                         return false;
                     } else {
-                        if (m_config.debug_level > 0) {
-                            std::cerr << "  Found "
-                                      << m_split_locations.size()
-                                      << " split locations -> using complex algorithm\n";
-                        }
                         ++m_stats.area_touching_rings_case;
 
                         timer.start();
@@ -1157,29 +954,6 @@ namespace osmium {
                     });
                     m_stats.inner_rings = m_rings.size() - m_stats.outer_rings;
 
-#ifdef OSMIUM_WITH_TIMER
-                    std::cout << m_stats.nodes << ' ' << m_stats.outer_rings << ' ' << m_stats.inner_rings <<
-                                                ' ' << timer_sort.elapsed_microseconds() <<
-                                                ' ' << timer_dupl.elapsed_microseconds() <<
-                                                ' ' << timer_intersection.elapsed_microseconds() <<
-                                                ' ' << timer_locations_list.elapsed_microseconds() <<
-                                                ' ' << timer_split.elapsed_microseconds();
-
-                    if (m_split_locations.empty()) {
-                        std::cout << ' ' << timer.elapsed_microseconds() << " 0";
-                    } else {
-                        std::cout << " 0" << ' ' << timer.elapsed_microseconds();
-                    }
-
-                    std::cout <<
-# ifdef OSMIUM_AREA_CHECK_INNER_OUTER_ROLES
-                                ' ' << timer_roles.elapsed_microseconds() <<
-# else
-                                " 0" <<
-# endif
-                                '\n';
-#endif
-
                     return true;
                 }
 
@@ -1190,9 +964,6 @@ namespace osmium {
                 explicit BasicAssembler(const config_type& config) :
                     m_config(config),
                     m_segment_list(config.debug_level > 1) {
-#ifdef OSMIUM_WITH_TIMER
-                    init_header();
-#endif
                 }
 
                 const AssemblerConfig& config() const noexcept {
