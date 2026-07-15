@@ -27,3 +27,5 @@
 data-raw/
 docs/
 literature/
+^src/.*\.o$
+^src/.*\.so$
