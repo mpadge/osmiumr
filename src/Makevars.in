@@ -8,13 +8,18 @@
 # real Boost that might also be present on the include path -- see that
 # file for why a real boost::program_options is not used.
 #
-# The three -Ivendor/... entries are libosmium/nlohmann-json/protozero,
-# vendored verbatim under src/vendor/ (see src/vendor/README.md) rather
-# than detected on the system -- unlike @osmiumr_cppflags@ below, these
-# paths are the same on every platform, which is what makes Windows
-# builds possible at all for these three (see ../plan-windows.md).
+# The three -isystem vendor/... entries are libosmium/nlohmann-json/
+# protozero, vendored verbatim under src/vendor/ (see
+# src/vendor/README.md) rather than detected on the system -- unlike
+# @osmiumr_cppflags@ below, these paths are the same on every platform,
+# which is what makes Windows builds possible at all for these three
+# (see ../plan-windows.md). -isystem rather than -I: these are
+# third-party headers we don't control, so compiler warnings that
+# originate inside them (e.g. nlohmann/json's own -Wdeprecated-
+# declarations noise on newer libc++) are suppressed rather than
+# surfaced as if they were osmiumr's own code.
 
-PKG_CPPFLAGS = -Icompat -Ivendor/libosmium/include -Ivendor/nlohmann/include -Ivendor/protozero/include @osmiumr_cppflags@ -I.
+PKG_CPPFLAGS = -Icompat -isystem vendor/libosmium/include -isystem vendor/nlohmann/include -isystem vendor/protozero/include @osmiumr_cppflags@ -I.
 PKG_LIBS = @osmiumr_libs@
 
 CXX_STD = CXX17
