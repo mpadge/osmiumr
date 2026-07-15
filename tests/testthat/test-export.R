@@ -56,6 +56,15 @@ test_that("output_format = text produces WKT geometry + tag columns", {
 })
 
 test_that("index_type accepts anonymous-mmap-backed index types", {
+  # sparse_mmap_array (and dense_mmap_array) are #ifdef __linux__-gated in
+  # osmium/index/map/sparse_mmap_array.hpp itself -- growing an anonymous
+  # mmap region relies on mremap(), which is Linux-only (no macOS/BSD
+  # equivalent) -- so osmium::index::MapFactory genuinely never registers
+  # this index type outside Linux, the same as real upstream osmium-tool.
+  # Not something to fix in the vendored code; just skip where it doesn't
+  # apply.
+  skip_on_os(c("mac", "windows", "solaris"))
+
   out <- tempfile(fileext = ".geojson")
   on.exit(unlink(out))
 

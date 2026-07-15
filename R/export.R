@@ -17,7 +17,10 @@
 #' @param geometry_types Comma-separated geometry types to write, e.g.
 #'   "point,linestring,polygon" (the default).
 #' @param index_type Node location index type (default "flex_mem"; see
-#'   `osmium export --show-index-types`).
+#'   `osmium export --show-index-types`). The anonymous-mmap-backed types
+#'   ("sparse_mmap_array", "dense_mmap_array") are Linux-only -- they rely
+#'   on `mremap()` to grow, which has no macOS/BSD equivalent -- and are
+#'   simply not in the index-type list there.
 #' @param keep_untagged If TRUE, also export features without any tags.
 #' @param attributes Comma-separated list of OSM attributes to add to
 #'   each feature (e.g. "version,timestamp"); none by default.

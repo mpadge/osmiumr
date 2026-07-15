@@ -44,7 +44,10 @@ options.}
 "point,linestring,polygon" (the default).}
 
 \item{index_type}{Node location index type (default "flex_mem"; see
-`osmium export --show-index-types`).}
+`osmium export --show-index-types`). The anonymous-mmap-backed types
+("sparse_mmap_array", "dense_mmap_array") are Linux-only -- they rely
+on `mremap()` to grow, which has no macOS/BSD equivalent -- and are
+simply not in the index-type list there.}
 
 \item{keep_untagged}{If TRUE, also export features without any tags.}
 
