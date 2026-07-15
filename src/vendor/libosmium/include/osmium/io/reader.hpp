@@ -181,54 +181,21 @@ namespace osmium {
                 creator(args)->parse();
             }
 
-#ifndef _WIN32
-            /**
-             * Fork and execute the given command in the child.
-             * A pipe is created between the child and the parent.
-             * The child writes to the pipe, the parent reads from it.
-             * This function never returns in the child.
-             *
-             * @param command Command to execute in the child.
-             * @param filename Filename to give to command as argument.
-             * @returns File descriptor of pipe in the parent.
-             * @throws std::system_error if a system call fails.
-             */
-            static int execute(const std::string& command, const std::string& filename, int* childpid) {
-                int pipefd[2];
-                if (pipe(pipefd) < 0) {
-                    throw std::system_error{errno, std::system_category(), "opening pipe failed"};
-                }
-                const pid_t pid = fork();
-                if (pid < 0) {
-                    throw std::system_error{errno, std::system_category(), "fork failed"};
-                }
-                if (pid == 0) { // child
-                    // close all file descriptors except one end of the pipe
-                    for (int i = 0; i < 32; ++i) {
-                        if (i != pipefd[1]) {
-                            ::close(i);
-                        }
-                    }
-                    if (dup2(pipefd[1], 1) < 0) { // put end of pipe as stdout/stdin
-                        std::exit(1); // NOLINT(concurrency-mt-unsafe)
-                    }
-
-                    ::open("/dev/null", O_RDONLY); // stdin
-                    ::open("/dev/null", O_WRONLY); // stderr
-                    // hack: -g switches off globbing in curl which allows [] to be used in file names
-                    // this is important for XAPI URLs
-                    // in theory this execute() function could be used for other commands, but it is
-                    // only used for curl at the moment, so this is okay.
-                    if (::execlp(command.c_str(), command.c_str(), "-g", filename.c_str(), nullptr) < 0) {
-                        std::exit(1); // NOLINT(concurrency-mt-unsafe)
-                    }
-                }
-                // parent
-                *childpid = pid;
-                ::close(pipefd[1]);
-                return pipefd[0];
-            }
-#endif
+            // osmiumr note: upstream libosmium has a POSIX-only `execute()`
+            // helper here (fork() + execlp("curl", ...) to read remote
+            // http(s)/ftp/file:// URLs, exit(1)-ing in the forked child on
+            // failure) that open_input_file_or_url() below used to call.
+            // Removed rather than patched in place: forking and exec'ing an
+            // external process from inside a long-running, potentially
+            // multi-threaded host process (an R session) is not something
+            // we want reachable at all, even though it already wasn't in
+            // practice -- every osmiumr R wrapper validates its input as an
+            // existing local file via normalizePath(mustWork = TRUE) before
+            // any C++ code runs, which rejects URL-like strings long before
+            // they could reach here. open_input_file_or_url() now throws
+            // unconditionally for URL-like filenames on every platform,
+            // matching the message upstream already used on Windows (where
+            // execute() was `#ifndef _WIN32`-guarded out to begin with).
 
             /**
              * Open File for reading. Handles URLs or normal files. URLs
@@ -239,13 +206,10 @@ namespace osmium {
              * @throws std::system_error if a system call fails.
              */
             static int open_input_file_or_url(const std::string& filename, int* childpid) {
+                (void)childpid;
                 const std::string protocol{filename.substr(0, filename.find_first_of(':'))};
                 if (protocol == "http" || protocol == "https" || protocol == "ftp" || protocol == "file") {
-#ifndef _WIN32
-                    return execute("curl", filename, childpid);
-#else
-                    throw io_error{"Reading OSM files from the network currently not supported on Windows."};
-#endif
+                    throw io_error{"Reading OSM files from the network is not supported."};
                 }
                 const int fd = osmium::io::detail::open_for_reading(filename);
 #if defined(__linux__) || defined(__FreeBSD__)

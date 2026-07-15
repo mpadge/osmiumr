@@ -984,7 +984,20 @@ namespace osmium {
                         break;
 #endif
                 }
-                std::abort(); // should never be here
+                // osmiumr note: upstream libosmium has `std::abort()` here.
+                // Aborting kills the entire host process -- fatal for an R
+                // session this is embedded in, not just this operation. The
+                // two preconditions above (compressed_data non-empty, and
+                // the pbf_compression::lz4 field-decoder branch throwing
+                // immediately when LZ4 support isn't compiled in -- see
+                // where `use_compression` is set, above) mean this is
+                // unreachable in practice, same as upstream's comment
+                // already states; throwing here instead of aborting is a
+                // strictly safer fallback for that "should never happen"
+                // case, and matches every other error branch in this same
+                // function (e.g. "illegal blob size" above), so callers
+                // that already catch osmium::pbf_error get this too.
+                throw osmium::pbf_error{"unknown or unsupported compression method in blob"};
             }
 
             inline osmium::Box decode_header_bbox(const data_view& data) {
