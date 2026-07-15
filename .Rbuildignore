@@ -2,6 +2,7 @@
 ^.*\.Rproj$
 ^CONDUCT\.md$
 ^CONTRIBUTING\.md$
+^LICENSE\.txt$
 ^Meta$
 ^README-.*\.png$
 ^README\.Rmd$
