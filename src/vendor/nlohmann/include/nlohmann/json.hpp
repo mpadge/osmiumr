@@ -25295,133 +25295,27 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     /// @name binary serialization/deserialization support
     /// @{
 
+    // osmiumr note: the to_cbor()/to_msgpack()/to_ubjson()/to_bjdata()/
+    // to_bson() overloads that used to live here are removed. Nothing in
+    // osmiumr calls any binary JSON serialization format (confirmed by
+    // grep -- osmiumr only ever dump()s/parse()s text JSON, for
+    // fileinfo's --json output and GeoJSON export/extract-boundary
+    // parsing). Those overloads were non-template members of basic_json,
+    // so merely declaring them -- regardless of whether they were ever
+    // called -- forced every instantiation of basic_json (i.e. any use
+    // of nlohmann::json at all) to form detail::output_adapter<std::
+    // uint8_t>, which names std::basic_string<unsigned char> and std::
+    // basic_ostream<unsigned char>: a use of the *primary*, unspecialized
+    // std::char_traits<T> template for a T other than char/wchar_t/
+    // char8_t/char16_t/char32_t, which recent libc++ (Xcode 26.5 on
+    // macOS) deprecates and which R CMD check's --as-cran surfaces as a
+    // WARNING ("checking whether package can be installed"). The from_*
+    // counterparts below are left as-is: they're member *function
+    // templates*, only instantiated if actually called with concrete
+    // arguments, so -- unlike to_*() -- their mere presence in the class
+    // body costs nothing and triggers nothing.
+
   public:
-    /// @brief create a CBOR serialization of a given JSON value
-    /// @sa https://json.nlohmann.me/api/basic_json/to_cbor/
-    static std::vector<std::uint8_t> to_cbor(const basic_json& j)
-    {
-        std::vector<std::uint8_t> result;
-        to_cbor(j, result);
-        return result;
-    }
-
-    /// @brief create a CBOR serialization of a given JSON value
-    /// @sa https://json.nlohmann.me/api/basic_json/to_cbor/
-    static void to_cbor(const basic_json& j, detail::output_adapter<std::uint8_t> o)
-    {
-        binary_writer<std::uint8_t>(o).write_cbor(j);
-    }
-
-    /// @brief create a CBOR serialization of a given JSON value
-    /// @sa https://json.nlohmann.me/api/basic_json/to_cbor/
-    static void to_cbor(const basic_json& j, detail::output_adapter<char> o)
-    {
-        binary_writer<char>(o).write_cbor(j);
-    }
-
-    /// @brief create a MessagePack serialization of a given JSON value
-    /// @sa https://json.nlohmann.me/api/basic_json/to_msgpack/
-    static std::vector<std::uint8_t> to_msgpack(const basic_json& j)
-    {
-        std::vector<std::uint8_t> result;
-        to_msgpack(j, result);
-        return result;
-    }
-
-    /// @brief create a MessagePack serialization of a given JSON value
-    /// @sa https://json.nlohmann.me/api/basic_json/to_msgpack/
-    static void to_msgpack(const basic_json& j, detail::output_adapter<std::uint8_t> o)
-    {
-        binary_writer<std::uint8_t>(o).write_msgpack(j);
-    }
-
-    /// @brief create a MessagePack serialization of a given JSON value
-    /// @sa https://json.nlohmann.me/api/basic_json/to_msgpack/
-    static void to_msgpack(const basic_json& j, detail::output_adapter<char> o)
-    {
-        binary_writer<char>(o).write_msgpack(j);
-    }
-
-    /// @brief create a UBJSON serialization of a given JSON value
-    /// @sa https://json.nlohmann.me/api/basic_json/to_ubjson/
-    static std::vector<std::uint8_t> to_ubjson(const basic_json& j,
-            const bool use_size = false,
-            const bool use_type = false)
-    {
-        std::vector<std::uint8_t> result;
-        to_ubjson(j, result, use_size, use_type);
-        return result;
-    }
-
-    /// @brief create a UBJSON serialization of a given JSON value
-    /// @sa https://json.nlohmann.me/api/basic_json/to_ubjson/
-    static void to_ubjson(const basic_json& j, detail::output_adapter<std::uint8_t> o,
-                          const bool use_size = false, const bool use_type = false)
-    {
-        binary_writer<std::uint8_t>(o).write_ubjson(j, use_size, use_type);
-    }
-
-    /// @brief create a UBJSON serialization of a given JSON value
-    /// @sa https://json.nlohmann.me/api/basic_json/to_ubjson/
-    static void to_ubjson(const basic_json& j, detail::output_adapter<char> o,
-                          const bool use_size = false, const bool use_type = false)
-    {
-        binary_writer<char>(o).write_ubjson(j, use_size, use_type);
-    }
-
-    /// @brief create a BJData serialization of a given JSON value
-    /// @sa https://json.nlohmann.me/api/basic_json/to_bjdata/
-    static std::vector<std::uint8_t> to_bjdata(const basic_json& j,
-            const bool use_size = false,
-            const bool use_type = false,
-            const bjdata_version_t version = bjdata_version_t::draft2)
-    {
-        std::vector<std::uint8_t> result;
-        to_bjdata(j, result, use_size, use_type, version);
-        return result;
-    }
-
-    /// @brief create a BJData serialization of a given JSON value
-    /// @sa https://json.nlohmann.me/api/basic_json/to_bjdata/
-    static void to_bjdata(const basic_json& j, detail::output_adapter<std::uint8_t> o,
-                          const bool use_size = false, const bool use_type = false,
-                          const bjdata_version_t version = bjdata_version_t::draft2)
-    {
-        binary_writer<std::uint8_t>(o).write_ubjson(j, use_size, use_type, true, true, version);
-    }
-
-    /// @brief create a BJData serialization of a given JSON value
-    /// @sa https://json.nlohmann.me/api/basic_json/to_bjdata/
-    static void to_bjdata(const basic_json& j, detail::output_adapter<char> o,
-                          const bool use_size = false, const bool use_type = false,
-                          const bjdata_version_t version = bjdata_version_t::draft2)
-    {
-        binary_writer<char>(o).write_ubjson(j, use_size, use_type, true, true, version);
-    }
-
-    /// @brief create a BSON serialization of a given JSON value
-    /// @sa https://json.nlohmann.me/api/basic_json/to_bson/
-    static std::vector<std::uint8_t> to_bson(const basic_json& j)
-    {
-        std::vector<std::uint8_t> result;
-        to_bson(j, result);
-        return result;
-    }
-
-    /// @brief create a BSON serialization of a given JSON value
-    /// @sa https://json.nlohmann.me/api/basic_json/to_bson/
-    static void to_bson(const basic_json& j, detail::output_adapter<std::uint8_t> o)
-    {
-        binary_writer<std::uint8_t>(o).write_bson(j);
-    }
-
-    /// @brief create a BSON serialization of a given JSON value
-    /// @sa https://json.nlohmann.me/api/basic_json/to_bson/
-    static void to_bson(const basic_json& j, detail::output_adapter<char> o)
-    {
-        binary_writer<char>(o).write_bson(j);
-    }
-
     /// @brief create a JSON value from an input in CBOR format
     /// @sa https://json.nlohmann.me/api/basic_json/from_cbor/
     template<typename InputType>
