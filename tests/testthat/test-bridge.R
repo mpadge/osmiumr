@@ -1,8 +1,8 @@
 test_that("registered commands include all Phase 1 commands", {
   cmds <- osmiumr_registered_commands()
   expect_true(all(c(
-    "cat", "check-refs", "export", "extract", "fileinfo", "getid",
-    "help", "merge", "renumber", "show", "sort", "tags-filter"
+    "cat", "export", "extract", "fileinfo", "getid",
+    "help", "merge", "sort", "tags-filter"
   ) %in% cmds))
 })
 

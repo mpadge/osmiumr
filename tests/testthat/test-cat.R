@@ -85,8 +85,8 @@ test_that("OPL round-trips as both an output and an input format", {
 
   # input_format is auto-detected from the .opl extension here, the same
   # way the CLI would; reading OPL back in and writing to PBF exercises
-  # OPL *input* parsing, which osmium_show()'s format = "opl" (output
-  # only) does not.
+  # OPL *input* parsing, which osmium_cat()'s own OPL *output* above does
+  # not.
   osmium_cat(opl_file, output = back_file)
   info <- osmium_fileinfo(back_file, extended = TRUE)
   expect_equal(info$data$count$nodes, mini_counts$nodes)

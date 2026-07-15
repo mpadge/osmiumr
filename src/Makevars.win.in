@@ -39,15 +39,12 @@ OSMIUM_TOOL_SOURCES = \
     osmium-tool/cmd_factory.cpp \
     osmium-tool/commands.cpp \
     osmium-tool/command_cat.cpp \
-    osmium-tool/command_check_refs.cpp \
     osmium-tool/command_export.cpp \
     osmium-tool/command_extract.cpp \
     osmium-tool/command_fileinfo.cpp \
     osmium-tool/command_getid.cpp \
     osmium-tool/command_help.cpp \
     osmium-tool/command_merge.cpp \
-    osmium-tool/command_renumber.cpp \
-    osmium-tool/command_show.cpp \
     osmium-tool/command_sort.cpp \
     osmium-tool/command_tags_filter.cpp \
     osmium-tool/id_file.cpp \
