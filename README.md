@@ -14,13 +14,9 @@ WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.o
 
 R bindings for [`osmium-tool`](https://osmcode.org/osmium-tool/), a
 command-line tool for working with OpenStreetMap data built on the
-[`libosmium`](https://osmcode.org/libosmium/) library. Rather than
-shelling out to an external `osmium` binary, rosmium embeds
-`osmium-tool`’s own C++ command implementations directly in the package
-(via `Rcpp`), so there is nothing to separately install: everything
-rosmium needs is either a system library it detects at install time
-(bz2, zlib, expat) or vendored source bundled with the package itself
-(`libosmium`, `protozero`, `nlohmann-json`).
+[`libosmium`](https://osmcode.org/libosmium/) library. The package
+contains R functions for most of the `osmium-tool` functionality
+described in [the manual](https://osmcode.org/osmium-tool/manual.html).
 
 ## Installation
 
@@ -41,7 +37,8 @@ library(rosmium)
 ## Example
 
 Grab a small real-world extract to work with – the “ITS Leeds” test file
-also used by [`osmextract`](https://docs.ropensci.org/osmextract/):
+used in the [`osmextract`
+package](https://docs.ropensci.org/osmextract/):
 
 ``` r
 its_example <- osmextract::oe_match("ITS Leeds", quiet = TRUE)
