@@ -1,7 +1,7 @@
 
 #include "cmd.hpp"
 
-// osmiumr note: this file is adapted from osmium-tool/src/commands.cpp.
+// rosmium note: this file is adapted from osmium-tool/src/commands.cpp.
 // register_commands() here only wires up the Phase 1 subset of commands
 // vendored into this package (see ../../plan.md). Add the remaining
 // command_*.hpp includes/registrations here as later phases vendor them.

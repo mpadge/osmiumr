@@ -30,11 +30,11 @@ osmium_fileinfo <- function(input, extended = FALSE, crc = FALSE,
   if (!is.null(get)) {
     args <- .arg(args, "--get", get)
     args <- c(args, input)
-    result <- osmiumr_call("fileinfo", args)
+    result <- rosmium_call("fileinfo", args)
     return(sub("\n$", "", result$stdout))
   }
 
   args <- c(args, "--json", input)
-  result <- osmiumr_call("fileinfo", args)
+  result <- rosmium_call("fileinfo", args)
   jsonlite::fromJSON(result$stdout, simplifyVector = TRUE)
 }

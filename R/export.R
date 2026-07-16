@@ -58,7 +58,7 @@ osmium_export <- function(input, output = NULL, output_format = NULL,
   args <- .flag(args, "--verbose", verbose)
   args <- c(args, input)
 
-  result <- osmiumr_call("export", args)
+  result <- rosmium_call("export", args)
 
   if (is.null(output)) {
     return(result$stdout)

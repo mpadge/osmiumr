@@ -206,7 +206,7 @@ namespace osmium {
 
                 void write_counter(int width, int n) {
                     write_color(color_white);
-                    // osmiumr note: was `output_formatted("    %0*d: ", width,
+                    // rosmium note: was `output_formatted("    %0*d: ", width,
                     // n++);` -- a printf-style call with a runtime ("*")
                     // field width. GCC's -Wformat-truncation can't prove
                     // `width` (ultimately derived from a collection size,

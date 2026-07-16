@@ -1,4 +1,4 @@
 #' @keywords internal
-#' @useDynLib osmiumr, .registration = TRUE
+#' @useDynLib rosmium, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 "_PACKAGE"

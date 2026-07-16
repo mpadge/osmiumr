@@ -90,7 +90,7 @@ test_that("show_errors surfaces geometry problems instead of silently dropping t
   # node and a ring that never closes -- exercises
   # osmium::area::ProblemReporter (osmium/area/problem_reporter.hpp),
   # which nothing in the well-formed test fixture ever triggers.
-  result <- osmiumr:::osmiumr_call(
+  result <- rosmium:::rosmium_call(
     "export",
     c(fixture("broken-multipolygon.osm"), "--output-format", "geojson",
       "--show-errors", "-o", tempfile(fileext = ".geojson"))

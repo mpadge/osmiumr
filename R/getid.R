@@ -54,6 +54,6 @@ osmium_getid <- function(input, output, ids = NULL, id_file = NULL,
   args <- .output_args(args, output, NULL, overwrite, fsync, generator, output_header)
   args <- c(args, input, ids)
 
-  osmiumr_call("getid", args)
+  rosmium_call("getid", args)
   invisible(output)
 }

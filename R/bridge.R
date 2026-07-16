@@ -1,4 +1,4 @@
-#' Run osmiumr_run() while also capturing R-console-level output
+#' Run rosmium_run() while also capturing R-console-level output
 #'
 #' Most vendored command output goes through raw OS file descriptor
 #' writes or std::cout/std::cerr, both caught by the C++-side
@@ -15,7 +15,7 @@
 #' something is converted to Rcpp::Rcout/Rcerr it no longer touches the
 #' OS file descriptor at all.
 #' @noRd
-.osmiumr_run_captured <- function(command, args) {
+.rosmium_run_captured <- function(command, args) {
   rcout_lines <- character()
   rcerr_lines <- character()
   rcout_conn <- textConnection("rcout_lines", "w", local = TRUE)
@@ -24,7 +24,7 @@
   sink(rcout_conn, type = "output")
   sink(rcerr_conn, type = "message")
   result <- tryCatch(
-    osmiumr_run(command, args),
+    rosmium_run(command, args),
     finally = {
       sink(type = "message")
       sink(type = "output")
@@ -48,9 +48,9 @@
 #'   ok, ran, error, stdout, stderr.
 #' @keywords internal
 #' @noRd
-osmiumr_call <- function(command, args, quiet = TRUE) {
+rosmium_call <- function(command, args, quiet = TRUE) {
   args <- as.character(args)
-  result <- .osmiumr_run_captured(command, args)
+  result <- .rosmium_run_captured(command, args)
 
   if (!quiet) {
     if (nzchar(result$stdout)) message(result$stdout, appendLF = FALSE)

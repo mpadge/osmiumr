@@ -984,7 +984,7 @@ namespace osmium {
                         break;
 #endif
                 }
-                // osmiumr note: upstream libosmium has `std::abort()` here.
+                // rosmium note: upstream libosmium has `std::abort()` here.
                 // Aborting kills the entire host process -- fatal for an R
                 // session this is embedded in, not just this operation. The
                 // two preconditions above (compressed_data non-empty, and

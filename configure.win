@@ -1,5 +1,5 @@
 #!/bin/sh
-# osmiumr Windows configure script, run by R CMD INSTALL under Rtools'
+# rosmium Windows configure script, run by R CMD INSTALL under Rtools'
 # bash. See ../plan-windows.md for the reasoning.
 #
 # libosmium, protozero, and nlohmann-json are all header-only and
@@ -56,11 +56,11 @@ EOF
     fi
 }
 
-echo "--- osmiumr configure.win ---"
+echo "--- rosmium configure.win ---"
 
 BZ2_OK=$(check_link bz2 "bzlib.h" "-lbz2")
 if [ "$BZ2_OK" != "yes" ]; then
-    fail "bz2 not found via the Rtools toolchain's default search paths. osmiumr does not vendor bz2 (it needs a compiled library, not just headers -- see plan-windows.md). Install it into your Rtools toolchain first, e.g. from an Rtools shell: pacman -S mingw-w64-\$(uname -m)-bzip2"
+    fail "bz2 not found via the Rtools toolchain's default search paths. rosmium does not vendor bz2 (it needs a compiled library, not just headers -- see plan-windows.md). Install it into your Rtools toolchain first, e.g. from an Rtools shell: pacman -S mingw-w64-\$(uname -m)-bzip2"
 fi
 echo "bz2: found"
 
@@ -72,7 +72,7 @@ echo "zlib: found"
 
 EXPAT_OK=$(check_link expat "expat.h" "-lexpat")
 if [ "$EXPAT_OK" != "yes" ]; then
-    fail "expat not found via the Rtools toolchain's default search paths. osmiumr does not vendor expat (it needs a compiled library, not just headers -- see plan-windows.md). Install it into your Rtools toolchain first, e.g. from an Rtools shell: pacman -S mingw-w64-\$(uname -m)-expat"
+    fail "expat not found via the Rtools toolchain's default search paths. rosmium does not vendor expat (it needs a compiled library, not just headers -- see plan-windows.md). Install it into your Rtools toolchain first, e.g. from an Rtools shell: pacman -S mingw-w64-\$(uname -m)-expat"
 fi
 echo "expat: found"
 
@@ -110,7 +110,7 @@ for flag in -Wl,--strip-debug -Wl,-S; do
     fi
 done
 if [ -z "$STRIP_LDFLAGS" ]; then
-    echo "Note: no working linker flag found to strip debug info (tried --strip-debug, -S) - osmiumr.dll will be larger than necessary, see plan-reduce-size.md"
+    echo "Note: no working linker flag found to strip debug info (tried --strip-debug, -S) - rosmium.dll will be larger than necessary, see plan-reduce-size.md"
 fi
 
 PKG_CPPFLAGS="$LZ4_DEFS"
@@ -119,8 +119,8 @@ PKG_LIBS="-lbz2 -lz -lexpat $LZ4_LIBS $STRIP_LDFLAGS"
 echo "PKG_CPPFLAGS=$PKG_CPPFLAGS"
 echo "PKG_LIBS=$PKG_LIBS"
 
-sed -e "s|@osmiumr_cppflags@|$PKG_CPPFLAGS|" \
-    -e "s|@osmiumr_libs@|$PKG_LIBS|" \
+sed -e "s|@rosmium_cppflags@|$PKG_CPPFLAGS|" \
+    -e "s|@rosmium_libs@|$PKG_LIBS|" \
     src/Makevars.win.in > src/Makevars.win
 
-echo "--- osmiumr configure.win: done ---"
+echo "--- rosmium configure.win: done ---"

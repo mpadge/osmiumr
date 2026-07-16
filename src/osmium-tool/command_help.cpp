@@ -29,7 +29,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #include <Rcpp.h> // MP: Added for R pkg to replace Rcpp::Rcout with Rcpp::Rcout
 
-// osmiumr note: upstream osmium-tool execlp()'s into `man` here to show a
+// rosmium note: upstream osmium-tool execlp()'s into `man` here to show a
 // man page on non-Windows systems. Replacing the current process image
 // with `man` is not safe when this code is compiled into a long-running
 // host process (an R session) rather than a short-lived standalone CLI
@@ -46,7 +46,7 @@ namespace {
 void show_help(const std::string& topic, const std::string& info) {
     Rcpp::Rcout << info << "\n";
     Rcpp::Rcout << "You'll find more documentation at https://osmcode.org/osmium-tool/\n";
-    Rcpp::Rcout << "(man page 'osmium-" << topic << "' not shown: osmiumr runs in-process and does not exec external pagers)\n";
+    Rcpp::Rcout << "(man page 'osmium-" << topic << "' not shown: rosmium runs in-process and does not exec external pagers)\n";
 }
 
 } // anonymous namespace

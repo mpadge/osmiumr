@@ -21,7 +21,7 @@ test_that("default_type applies to unprefixed IDs", {
 
   # Both outputs contain nothing but the bare relation (no add_referenced),
   # so they're expected to be byte-identical -- and since both come from
-  # the same osmiumr build, comparing bytes directly (rather than via
+  # the same rosmium build, comparing bytes directly (rather than via
   # `osmium_fileinfo(extended = TRUE)`, whose bbox/CRC computation errors
   # on files with no located nodes, matching real osmium-tool's own
   # behaviour) is both simpler and unaffected by that.

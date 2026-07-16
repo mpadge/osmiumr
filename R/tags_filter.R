@@ -50,6 +50,6 @@ osmium_tags_filter <- function(input, output, expressions = NULL,
     args <- c(args, input, expressions)
   }
 
-  osmiumr_call("tags-filter", args)
+  rosmium_call("tags-filter", args)
   invisible(output)
 }

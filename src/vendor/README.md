@@ -1,7 +1,7 @@
 # Vendored dependencies
 
-Header-only libraries osmium-tool (and thus osmiumr) depends on, vendored
-here so building osmiumr doesn't require a system install of any of
+Header-only libraries osmium-tool (and thus rosmium) depends on, vendored
+here so building rosmium doesn't require a system install of any of
 them on any platform (see `../../plan-windows.md` for why: Windows in
 particular has no standard system location for these, unlike
 Linux/macOS package managers). All three are permissively licensed and
@@ -20,7 +20,7 @@ in `../osmium-tool/command_help.cpp` and `../osmium-tool/command_show.cpp`
 (the one exception, libosmium's `osmium::io::Reader::execute()` in
 `io/reader.hpp`, which forks and execs `curl` to read remote XAPI URLs,
 is already `#ifndef _WIN32`-guarded by libosmium itself and is, on POSIX,
-unreachable through osmiumr's public API since every R wrapper validates
+unreachable through rosmium's public API since every R wrapper validates
 its input as an existing local file via `normalizePath(mustWork = TRUE)`
 before any C++ code runs).
 

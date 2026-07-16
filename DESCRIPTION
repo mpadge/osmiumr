@@ -1,4 +1,4 @@
-Package: osmiumr
+Package: rosmium
 Type: Package
 Title: R Bindings for the 'osmium-tool' OpenStreetMap Command Line Tool
 Version: 0.1.0
@@ -14,7 +14,7 @@ Encoding: UTF-8
 SystemRequirements: C++17, libosmium (>= 2.23.1), protozero (>= 1.6.3),
     nlohmann-json (>= 3.0), bz2lib, zlib, expat. Optionally lz4 for LZ4
     PBF compression support. Unlike osmium-tool itself, no boost
-    installation is required; osmiumr bundles its own minimal
+    installation is required; rosmium bundles its own minimal
     boost::program_options replacement (see src/compat/).
 Imports:
     Rcpp,

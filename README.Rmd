@@ -15,37 +15,37 @@ knitr::opts_chunk$set(
 
 
 
-# osmiumr
+# rosmium
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/mpadge/osmiumr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mpadge/osmiumr/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/mpadge/osmiumr/branch/main/graph/badge.svg)](https://codecov.io/gh/mpadge/osmiumr)
+[![R-CMD-check](https://github.com/mpadge/rosmium/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mpadge/rosmium/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/mpadge/rosmium/branch/main/graph/badge.svg)](https://codecov.io/gh/mpadge/rosmium)
 [![Project Status: WIP](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 <!-- badges: end -->
 
 R bindings for [`osmium-tool`](https://osmcode.org/osmium-tool/), a
 command-line tool for working with OpenStreetMap data built on the
 [`libosmium`](https://osmcode.org/libosmium/) library. Rather than
-shelling out to an external `osmium` binary, osmiumr embeds
+shelling out to an external `osmium` binary, rosmium embeds
 `osmium-tool`'s own C++ command implementations directly in the package
 (via `Rcpp`), so there is nothing to separately install: everything
-osmiumr needs is either a system library it detects at install time
+rosmium needs is either a system library it detects at install time
 (bz2, zlib, expat) or vendored source bundled with the package itself
 (`libosmium`, `protozero`, `nlohmann-json`).
 
 ## Installation
 
-You can install the development version of osmiumr from
+You can install the development version of rosmium from
 [GitHub](https://github.com/) with:
 
 ```r
 # install.packages("remotes")
-remotes::install_github("mpadge/osmiumr")
+remotes::install_github("mpadge/rosmium")
 ```
 
 Then load for use:
 ```{r library}
-library(osmiumr)
+library(rosmium)
 ```
 
 
@@ -114,7 +114,7 @@ plot(sf::st_geometry(roads))
 
 ## Available commands
 
-Each `osmium-tool` command vendored into osmiumr has a corresponding
+Each `osmium-tool` command vendored into rosmium has a corresponding
 `osmium_*()` R function:
 
 | Function | Wraps | Purpose |
@@ -134,4 +134,4 @@ set of options.
 ## License
 
 GPL-3, inherited from the GPL-3-licensed `osmium-tool`/`libosmium` C++
-sources osmiumr wraps and vendors (see `LICENSE.txt`).
+sources rosmium wraps and vendors (see `LICENSE.txt`).

@@ -127,11 +127,11 @@ namespace osmium {
             Queue(Queue&&) = delete;
             Queue& operator=(Queue&&) = delete;
 
-            // osmiumr note: upstream also has a debug destructor here,
+            // rosmium note: upstream also has a debug destructor here,
             // gated behind #ifdef OSMIUM_DEBUG_QUEUE_SIZE (never defined
             // anywhere in this package), that prints queue high-water-mark
             // stats via std::cerr. Removed rather than kept dead behind
-            // its #ifdef, since osmiumr has no way to define that macro
+            // its #ifdef, since rosmium has no way to define that macro
             // through any exposed R parameter -- see plan-cout.md.
             ~Queue() = default;
 

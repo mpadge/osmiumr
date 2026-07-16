@@ -28,6 +28,6 @@ osmium_sort <- function(input, output = NULL,
   args <- .output_args(args, output, NULL, overwrite, fsync, generator, output_header)
   args <- c(args, input)
 
-  osmiumr_call("sort", args)
+  rosmium_call("sort", args)
   invisible(output)
 }

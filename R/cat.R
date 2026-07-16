@@ -39,7 +39,7 @@ osmium_cat <- function(input, output = NULL, output_format = NULL,
                         generator, output_header)
   args <- c(args, input)
 
-  result <- osmiumr_call("cat", args)
+  result <- rosmium_call("cat", args)
 
   if (is.null(output)) {
     return(result$stdout)

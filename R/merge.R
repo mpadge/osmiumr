@@ -24,6 +24,6 @@ osmium_merge <- function(input, output = NULL, with_history = FALSE,
   args <- .output_args(args, output, NULL, overwrite, fsync, generator, output_header)
   args <- c(args, input)
 
-  osmiumr_call("merge", args)
+  rosmium_call("merge", args)
   invisible(output)
 }

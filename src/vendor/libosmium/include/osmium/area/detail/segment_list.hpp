@@ -87,11 +87,11 @@ namespace osmium {
 
                 slist_type m_segments;
 
-                // osmiumr note: still set (see constructor /
+                // rosmium note: still set (see constructor /
                 // enable_debug_output() below) but no longer read anywhere
                 // -- the two `if
                 // (m_debug) { std::cerr << ...; }` debug-trace blocks that
-                // used to check it were removed, since osmiumr has no way
+                // used to check it were removed, since rosmium has no way
                 // to reach debug_level > 1 (what ultimately drives this)
                 // through any exposed R parameter. See plan-cout.md.
                 bool m_debug;

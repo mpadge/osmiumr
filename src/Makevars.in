@@ -3,23 +3,23 @@
 # the substituted CPPFLAGS/LIBS values below are determined.
 #
 # -Icompat comes first so vendored osmium-tool files' own
-# `#include <boost/program_options.hpp>` resolves to osmiumr's
+# `#include <boost/program_options.hpp>` resolves to rosmium's
 # header-only shim (compat/boost/program_options.hpp) instead of any
 # real Boost that might also be present on the include path -- see that
 # file for why a real boost::program_options is not used.
 #
 # The three -Ivendor/... entries are libosmium/nlohmann-json/protozero,
 # vendored verbatim under src/vendor/ (see src/vendor/README.md) rather
-# than detected on the system -- unlike @osmiumr_cppflags@ below, these
+# than detected on the system -- unlike @rosmium_cppflags@ below, these
 # paths are the same on every platform, which is what makes Windows
 # builds possible at all for these three (see ../plan-windows.md).
 
-PKG_CPPFLAGS = -Icompat -Ivendor/libosmium/include -Ivendor/nlohmann/include -Ivendor/protozero/include @osmiumr_cppflags@ -I.
-PKG_LIBS = @osmiumr_libs@
+PKG_CPPFLAGS = -Icompat -Ivendor/libosmium/include -Ivendor/nlohmann/include -Ivendor/protozero/include @rosmium_cppflags@ -I.
+PKG_LIBS = @rosmium_libs@
 
 CXX_STD = CXX17
 
-# Size reduction -- see ../plan-reduce-size.md. @osmiumr_libs@ above
+# Size reduction -- see ../plan-reduce-size.md. @rosmium_libs@ above
 # includes a linker flag ../configure probes for (trying
 # -Wl,--strip-debug, then -Wl,-S, then giving up) to strip debugging
 # metadata from the final .so at link time: measured 19MB unstripped,
@@ -37,7 +37,7 @@ CXX_STD = CXX17
 # principle a big win given how much of the compiled code comes from
 # two large header-only template libraries (libosmium, nlohmann/json,
 # see src/vendor/) that get instantiated per translation unit
-# regardless of whether a given osmiumr command path ever actually
+# regardless of whether a given rosmium command path ever actually
 # calls them. Measured essentially no size difference on top of
 # --strip-debug alone in this toolchain (the linker was apparently
 # already collapsing most of that via COMDAT folding), while

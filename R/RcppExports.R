@@ -14,13 +14,13 @@
 #' @return A list with elements ok (logical), ran (logical, whether run()
 #'   was reached at all), error (string or NULL), stdout (string), stderr
 #'   (string).
-osmiumr_run <- function(command, args) {
-    .Call(`_osmiumr_osmiumr_run`, command, args)
+rosmium_run <- function(command, args) {
+    .Call(`_rosmium_rosmium_run`, command, args)
 }
 
 #' List commands registered with the vendored osmium-tool CommandFactory
 #' @return character vector of command names
-osmiumr_registered_commands <- function() {
-    .Call(`_osmiumr_osmiumr_registered_commands`)
+rosmium_registered_commands <- function() {
+    .Call(`_rosmium_rosmium_registered_commands`)
 }
 

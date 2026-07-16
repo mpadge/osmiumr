@@ -1,7 +1,7 @@
-#ifndef OSMIUMR_COMPAT_BOOST_PROGRAM_OPTIONS_HPP
-#define OSMIUMR_COMPAT_BOOST_PROGRAM_OPTIONS_HPP
+#ifndef ROSMIUM_COMPAT_BOOST_PROGRAM_OPTIONS_HPP
+#define ROSMIUM_COMPAT_BOOST_PROGRAM_OPTIONS_HPP
 
-// osmiumr note: this is NOT a copy of any part of Boost. It is a small,
+// rosmium note: this is NOT a copy of any part of Boost. It is a small,
 // independently written, header-only stand-in for the specific subset of
 // the boost::program_options API that osmium-tool's vendored
 // command_*.cpp setup() methods use (see ../../../plan.md for why).
@@ -19,7 +19,7 @@
 // This file is deliberately placed on the include path ahead of any real
 // boost so it satisfies that #include. It is not a general-purpose
 // program_options replacement: every vendored setup() builds its
-// std::vector<std::string> "arguments" from osmiumr's own R wrapper
+// std::vector<std::string> "arguments" from rosmium's own R wrapper
 // functions, never from a raw shell command line, so only a reduced
 // grammar is supported:
 //   - long options as two separate tokens: "--name" or "--name" "value"
@@ -49,7 +49,7 @@ namespace program_options {
 /// Thrown for anything that would be a command-line syntax/usage error:
 /// unrecognised option, option missing its required value, or an
 /// unexpected positional argument. Mirrors boost::program_options::error
-/// closely enough that code catching that type (osmiumr's r_bridge.cpp)
+/// closely enough that code catching that type (rosmium's r_bridge.cpp)
 /// still catches parsing problems here.
 class error : public std::logic_error {
 public:
@@ -463,4 +463,4 @@ inline void notify(variables_map&) {
 } // namespace program_options
 } // namespace boost
 
-#endif // OSMIUMR_COMPAT_BOOST_PROGRAM_OPTIONS_HPP
+#endif // ROSMIUM_COMPAT_BOOST_PROGRAM_OPTIONS_HPP

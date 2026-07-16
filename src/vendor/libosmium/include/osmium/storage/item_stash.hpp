@@ -303,7 +303,7 @@ namespace osmium {
          *
          * Complexity: Linear in size() + count_removed().
          */
-        // osmiumr note: upstream also has GC timing/stats output here,
+        // rosmium note: upstream also has GC timing/stats output here,
         // gated behind #ifdef OSMIUM_ITEM_STORAGE_GC_DEBUG (never defined
         // anywhere in this package) and printed via std::cerr. Removed --
         // see plan-cout.md.

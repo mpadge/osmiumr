@@ -1,8 +1,8 @@
 #!/bin/sh
-# osmiumr configure script.
+# rosmium configure script.
 #
 # Locates the system libraries osmium-tool's own CMakeLists.txt requires
-# that osmiumr does NOT vendor, and writes src/Makevars from
+# that rosmium does NOT vendor, and writes src/Makevars from
 # src/Makevars.in.
 #
 # libosmium, protozero, and nlohmann-json are all header-only and are
@@ -16,7 +16,7 @@
 # What's left needing detection is bz2/zlib/expat (+ optional lz4),
 # which are compiled libraries, not headers, so can't be vendored the
 # same way. The one dependency osmium-tool itself needs but this
-# package does not is boost::program_options: osmiumr ships its own
+# package does not is boost::program_options: rosmium ships its own
 # header-only stand-in (src/compat/boost/program_options.hpp) for the
 # small subset of that API the vendored command_*.cpp setup() methods use,
 # so there is nothing to detect or link for Boost at all -- see that file
@@ -98,7 +98,7 @@ find_lib() {
     return 1
 }
 
-echo "--- osmiumr configure ---"
+echo "--- rosmium configure ---"
 
 # --- bz2, zlib, expat ------------------------------------------------------
 BZ2_INC=$(find_header "bzlib.h") || fail "bzlib.h not found. Install libbz2-dev."
@@ -150,7 +150,7 @@ for flag in -Wl,--strip-debug -Wl,-S; do
     fi
 done
 if [ -z "$STRIP_LDFLAGS" ]; then
-    echo "Note: no working linker flag found to strip debug info (tried --strip-debug, -S) - osmiumr.so will be larger than necessary, see plan-reduce-size.md"
+    echo "Note: no working linker flag found to strip debug info (tried --strip-debug, -S) - rosmium.so will be larger than necessary, see plan-reduce-size.md"
 fi
 rm -rf "$STRIPTEST_DIR"
 
@@ -160,8 +160,8 @@ PKG_LIBS="-L$BZ2_LIB_DIR -lbz2 -L$ZLIB_LIB_DIR -lz -L$EXPAT_LIB_DIR -lexpat $LZ4
 echo "PKG_CPPFLAGS=$PKG_CPPFLAGS"
 echo "PKG_LIBS=$PKG_LIBS"
 
-sed -e "s|@osmiumr_cppflags@|$PKG_CPPFLAGS|" \
-    -e "s|@osmiumr_libs@|$PKG_LIBS|" \
+sed -e "s|@rosmium_cppflags@|$PKG_CPPFLAGS|" \
+    -e "s|@rosmium_libs@|$PKG_LIBS|" \
     src/Makevars.in > src/Makevars
 
-echo "--- osmiumr configure: done ---"
+echo "--- rosmium configure: done ---"

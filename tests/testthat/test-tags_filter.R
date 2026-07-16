@@ -22,7 +22,7 @@ test_that("omit_referenced drops nodes that are only referenced", {
   # `get=` sidesteps computing/serializing a bounding box, which is what
   # `extended = TRUE` alone would do and which errors on a file with no
   # located nodes -- true of out_without_refs here, and true of real
-  # osmium-tool's own `fileinfo --extended --json`, not an osmiumr bug.
+  # osmium-tool's own `fileinfo --extended --json`, not an rosmium bug.
   n_with_refs <- as.integer(osmium_fileinfo(out_with_refs, extended = TRUE, get = "data.count.nodes"))
   n_without_refs <- as.integer(osmium_fileinfo(out_without_refs, extended = TRUE, get = "data.count.nodes"))
 

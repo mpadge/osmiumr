@@ -25295,10 +25295,10 @@ class basic_json // NOLINT(cppcoreguidelines-special-member-functions,hicpp-spec
     /// @name binary serialization/deserialization support
     /// @{
 
-    // osmiumr note: the to_cbor()/to_msgpack()/to_ubjson()/to_bjdata()/
+    // rosmium note: the to_cbor()/to_msgpack()/to_ubjson()/to_bjdata()/
     // to_bson() overloads that used to live here are removed. Nothing in
-    // osmiumr calls any binary JSON serialization format (confirmed by
-    // grep -- osmiumr only ever dump()s/parse()s text JSON, for
+    // rosmium calls any binary JSON serialization format (confirmed by
+    // grep -- rosmium only ever dump()s/parse()s text JSON, for
     // fileinfo's --json output and GeoJSON export/extract-boundary
     // parsing). Those overloads were non-template members of basic_json,
     // so merely declaring them -- regardless of whether they were ever

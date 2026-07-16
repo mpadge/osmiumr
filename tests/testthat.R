@@ -1,4 +1,4 @@
 library(testthat)
-library(osmiumr)
+library(rosmium)
 
-test_check("osmiumr")
+test_check("rosmium")

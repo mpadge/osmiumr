@@ -181,7 +181,7 @@ namespace osmium {
                 creator(args)->parse();
             }
 
-            // osmiumr note: upstream libosmium has a POSIX-only `execute()`
+            // rosmium note: upstream libosmium has a POSIX-only `execute()`
             // helper here (fork() + execlp("curl", ...) to read remote
             // http(s)/ftp/file:// URLs, exit(1)-ing in the forked child on
             // failure) that open_input_file_or_url() below used to call.
@@ -189,7 +189,7 @@ namespace osmium {
             // external process from inside a long-running, potentially
             // multi-threaded host process (an R session) is not something
             // we want reachable at all, even though it already wasn't in
-            // practice -- every osmiumr R wrapper validates its input as an
+            // practice -- every rosmium R wrapper validates its input as an
             // existing local file via normalizePath(mustWork = TRUE) before
             // any C++ code runs, which rejects URL-like strings long before
             // they could reach here. open_input_file_or_url() now throws

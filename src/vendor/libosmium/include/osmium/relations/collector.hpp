@@ -451,13 +451,13 @@ namespace osmium {
                 const uint64_t relations_buffer_capacity = m_relations_buffer.capacity();
                 const uint64_t members_buffer_capacity = m_members_buffer.capacity();
 
-                // osmiumr note: upstream also prints these capacity/size
+                // rosmium note: upstream also prints these capacity/size
                 // figures to std::cerr unconditionally (not behind any
                 // debug flag) every time this is called. Removed --
                 // nothing in osmium-tool ever calls this particular
                 // Collector::used_memory() (only unrelated same-named
                 // methods on other classes, e.g. IdSetDense), so it was
-                // already dead code from osmiumr's perspective; the
+                // already dead code from rosmium's perspective; the
                 // return-value computation below is kept exactly as
                 // upstream in case anything internal to libosmium itself
                 // depends on it. See plan-cout.md.

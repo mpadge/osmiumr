@@ -69,6 +69,6 @@ osmium_extract <- function(input, output = NULL, bbox = NULL,
   args <- .output_args(args, output, NULL, overwrite, fsync, generator, output_header)
   args <- c(args, input)
 
-  osmiumr_call("extract", args)
+  rosmium_call("extract", args)
   invisible(if (!is.null(config)) directory else output)
 }

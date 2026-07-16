@@ -1,4 +1,4 @@
-# These tests compare osmiumr's in-process output against the actual
+# These tests compare rosmium's in-process output against the actual
 # osmium-tool CLI binary, when one happens to be installed (never
 # required -- CRAN/CI machines typically won't have it). CRC32 checksums
 # (from `osmium fileinfo --crc`) are compared rather than raw bytes,
@@ -61,7 +61,7 @@ test_that("full extract -> tags-filter pipeline matches the CLI end to end", {
   system2("osmium", c("extract", "-b", bbox_arg, input, "-o", extract_cli))
   system2("osmium", c("tags-filter", extract_cli, "wr/highway", "-o", highways_cli))
 
-  # -- osmiumr -------------------------------------------------------------
+  # -- rosmium -------------------------------------------------------------
   extract_r <- file.path(r_dir, "extract.pbf")
   highways_r <- file.path(r_dir, "highways.osm")
   osmium_extract(input, output = extract_r, bbox = box)

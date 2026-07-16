@@ -1,4 +1,4 @@
-// osmiumr: in-process bridge between R and osmium-tool's Command classes
+// rosmium: in-process bridge between R and osmium-tool's Command classes
 // (vendored, lightly adapted, under src/osmium-tool/ — see ../plan.md).
 //
 // This file plays the role that osmium-tool/src/main.cpp plays for the
@@ -21,7 +21,7 @@
 #include <osmium/io/pbf.hpp>
 #include <osmium/osm/location.hpp>
 
-#include <boost/program_options.hpp> // osmiumr's own shim; see src/compat/boost/program_options.hpp
+#include <boost/program_options.hpp> // rosmium's own shim; see src/compat/boost/program_options.hpp
 
 #include <Rcpp.h>
 
@@ -35,14 +35,14 @@
 
 #ifdef _WIN32
 # include <io.h>
-# define OSMIUMR_DUP _dup
-# define OSMIUMR_DUP2 _dup2
-# define OSMIUMR_FILENO _fileno
+# define ROSMIUM_DUP _dup
+# define ROSMIUM_DUP2 _dup2
+# define ROSMIUM_FILENO _fileno
 #else
 # include <unistd.h>
-# define OSMIUMR_DUP dup
-# define OSMIUMR_DUP2 dup2
-# define OSMIUMR_FILENO fileno
+# define ROSMIUM_DUP dup
+# define ROSMIUM_DUP2 dup2
+# define ROSMIUM_FILENO fileno
 #endif
 
 namespace {
@@ -55,7 +55,7 @@ namespace {
 class StdFdCapture {
 public:
     StdFdCapture() {
-        // osmiumr note: upstream (our own r_bridge.cpp) also had explicit
+        // rosmium note: upstream (our own r_bridge.cpp) also had explicit
         // std::cout.flush()/std::cerr.flush() calls here. Removed: they
         // were the only two remaining std::cout/std::cerr symbol
         // references in this file (see plan-cout.md Step 2) and are
@@ -67,17 +67,17 @@ public:
         // already flushes any pending std::cout/std::cerr content too.
         std::fflush(nullptr);
 
-        saved_stdout_ = OSMIUMR_DUP(1);
-        saved_stderr_ = OSMIUMR_DUP(2);
+        saved_stdout_ = ROSMIUM_DUP(1);
+        saved_stderr_ = ROSMIUM_DUP(2);
 
         stdout_file_ = std::tmpfile();
         stderr_file_ = std::tmpfile();
 
         if (stdout_file_) {
-            OSMIUMR_DUP2(OSMIUMR_FILENO(stdout_file_), 1);
+            ROSMIUM_DUP2(ROSMIUM_FILENO(stdout_file_), 1);
         }
         if (stderr_file_) {
-            OSMIUMR_DUP2(OSMIUMR_FILENO(stderr_file_), 2);
+            ROSMIUM_DUP2(ROSMIUM_FILENO(stderr_file_), 2);
         }
     }
 
@@ -109,10 +109,10 @@ public:
         }
         std::fflush(nullptr);
         if (saved_stdout_ >= 0) {
-            OSMIUMR_DUP2(saved_stdout_, 1);
+            ROSMIUM_DUP2(saved_stdout_, 1);
         }
         if (saved_stderr_ >= 0) {
-            OSMIUMR_DUP2(saved_stderr_, 2);
+            ROSMIUM_DUP2(saved_stderr_, 2);
         }
         restored_ = true;
     }
@@ -168,7 +168,7 @@ private:
 //'   was reached at all), error (string or NULL), stdout (string), stderr
 //'   (string).
 // [[Rcpp::export]]
-Rcpp::List osmiumr_run(std::string command, std::vector<std::string> args) {
+Rcpp::List rosmium_run(std::string command, std::vector<std::string> args) {
     CommandFactory factory;
     register_commands(factory);
 
@@ -224,7 +224,7 @@ Rcpp::List osmiumr_run(std::string command, std::vector<std::string> args) {
 //' List commands registered with the vendored osmium-tool CommandFactory
 //' @return character vector of command names
 // [[Rcpp::export]]
-Rcpp::CharacterVector osmiumr_registered_commands() {
+Rcpp::CharacterVector rosmium_registered_commands() {
     CommandFactory factory;
     register_commands(factory);
 

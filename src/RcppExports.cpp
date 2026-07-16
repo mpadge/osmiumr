@@ -10,36 +10,36 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// osmiumr_run
-Rcpp::List osmiumr_run(std::string command, std::vector<std::string> args);
-RcppExport SEXP _osmiumr_osmiumr_run(SEXP commandSEXP, SEXP argsSEXP) {
+// rosmium_run
+Rcpp::List rosmium_run(std::string command, std::vector<std::string> args);
+RcppExport SEXP _rosmium_rosmium_run(SEXP commandSEXP, SEXP argsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< std::string >::type command(commandSEXP);
     Rcpp::traits::input_parameter< std::vector<std::string> >::type args(argsSEXP);
-    rcpp_result_gen = Rcpp::wrap(osmiumr_run(command, args));
+    rcpp_result_gen = Rcpp::wrap(rosmium_run(command, args));
     return rcpp_result_gen;
 END_RCPP
 }
-// osmiumr_registered_commands
-Rcpp::CharacterVector osmiumr_registered_commands();
-RcppExport SEXP _osmiumr_osmiumr_registered_commands() {
+// rosmium_registered_commands
+Rcpp::CharacterVector rosmium_registered_commands();
+RcppExport SEXP _rosmium_rosmium_registered_commands() {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(osmiumr_registered_commands());
+    rcpp_result_gen = Rcpp::wrap(rosmium_registered_commands());
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_osmiumr_osmiumr_run", (DL_FUNC) &_osmiumr_osmiumr_run, 2},
-    {"_osmiumr_osmiumr_registered_commands", (DL_FUNC) &_osmiumr_osmiumr_registered_commands, 0},
+    {"_rosmium_rosmium_run", (DL_FUNC) &_rosmium_rosmium_run, 2},
+    {"_rosmium_rosmium_registered_commands", (DL_FUNC) &_rosmium_rosmium_registered_commands, 0},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_osmiumr(DllInfo *dll) {
+RcppExport void R_init_rosmium(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }
