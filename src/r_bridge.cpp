@@ -20,6 +20,7 @@
 #include <osmium/handler/check_order.hpp>
 #include <osmium/io/pbf.hpp>
 #include <osmium/osm/location.hpp>
+#include <osmium/thread/pool.hpp>
 
 #include <boost/program_options.hpp> // rosmium's own shim; see src/compat/boost/program_options.hpp
 
@@ -152,6 +153,20 @@ private:
 
 }; // class StdFdCapture
 
+// Every osmium::io::Reader/Writer created inside a Command's setup()/run()
+// falls back to osmium::thread::Pool::default_instance() (see
+// vendor/libosmium/include/osmium/thread/pool.hpp for why that pool must
+// not be left to join its worker threads via ordinary static-teardown on
+// process exit). Constructing this guard first in rosmium_run() means it
+// is destroyed last, after cmd and every Reader/Writer it created have
+// already gone out of scope, so the join below happens synchronously in
+// this call rather than at process/DLL exit.
+struct PoolShutdownGuard {
+    ~PoolShutdownGuard() {
+        osmium::thread::Pool::shutdown_default_instance();
+    }
+};
+
 } // anonymous namespace
 
 //' Run an osmium-tool command in-process
@@ -169,6 +184,8 @@ private:
 //'   (string).
 // [[Rcpp::export]]
 Rcpp::List rosmium_run(std::string command, std::vector<std::string> args) {
+    PoolShutdownGuard pool_guard;
+
     CommandFactory factory;
     register_commands(factory);
 

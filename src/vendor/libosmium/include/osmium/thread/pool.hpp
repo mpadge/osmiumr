@@ -40,6 +40,7 @@ DEALINGS IN THE SOFTWARE.
 
 #include <cstddef>
 #include <future>
+#include <memory>
 #include <thread>
 #include <type_traits>
 #include <utility>
@@ -184,8 +185,38 @@ namespace osmium {
              * Do not use this if your program will fork.
              */
             static Pool& default_instance() {
-                static Pool pool{};
+                return *default_instance_storage();
+            }
+
+            // rosmium patch (see src/vendor/README.md): upstream's
+            // default_instance() joins its worker threads in ~Pool(),
+            // which for a plain function-local static only runs during
+            // static/DLL teardown at process exit. Joining threads that
+            // late deadlocks on Windows (the loader lock is held during
+            // DLL_PROCESS_DETACH, and other threads may already have been
+            // force-terminated by ExitProcess before it runs), which hung
+            // every Windows CI job on this package for exactly the
+            // 6-hour GitHub Actions job timeout even though the actual
+            // R-level test run had long since finished. Storing the pool
+            // behind a pointer lets rosmium's r_bridge.cpp explicitly
+            // join and destroy it right after each command finishes --
+            // in the calling thread's normal control flow, not at
+            // process teardown -- via shutdown_default_instance() below.
+            static std::unique_ptr<Pool>& default_instance_storage() {
+                static std::unique_ptr<Pool> pool;
+                if (!pool) {
+                    pool = std::unique_ptr<Pool>{new Pool{}};
+                }
                 return pool;
+            }
+
+            // rosmium patch: explicitly join and destroy the default
+            // pool's worker threads now. Safe to call whenever no
+            // Reader/Writer is currently using the default pool -- the
+            // next call to default_instance() transparently creates a
+            // fresh one.
+            static void shutdown_default_instance() {
+                default_instance_storage().reset();
             }
 
             void shutdown_all_workers() {
